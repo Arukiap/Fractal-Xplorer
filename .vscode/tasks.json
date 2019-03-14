@@ -10,13 +10,13 @@
             "args": [ 
                 "-g",
                 "main.cpp",
-                "-o",
-                "main.cpp.exe",
                 "-I",
-                "include/",
-                "-L/lib",
+                "include\\",
+                "-Llib",
                 "-lSDL2main",
                 "-lSDL2",
+                "-o",
+                "main.cpp.exe",
             ],
             "group": {
                 "kind": "build",
