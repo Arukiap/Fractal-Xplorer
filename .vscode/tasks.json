@@ -8,13 +8,15 @@
             "type": "shell",
             "command": "g++",
             "args": [ 
-                "-I",
-                "include/",
-                "-L/lib",
                 "-g",
                 "main.cpp",
                 "-o",
-                "main.cpp.exe"
+                "main.cpp.exe",
+                "-I",
+                "include/",
+                "-L/lib",
+                "-lSDL2main",
+                "-lSDL2",
             ],
             "group": {
                 "kind": "build",
