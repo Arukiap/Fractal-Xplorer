@@ -32,12 +32,12 @@
                 "-I",
                 "include/",
                 "-Llib",
-                "-lglew32s",
+                "-lGLEW",
                 "-lSDL2main",
                 "-lSDL2",
                 "-o",
                 "main.cpp.out",
-                "-lopengl32"
+                "-lOpenGL"
             ],
             "group": {
                 "kind": "build",
