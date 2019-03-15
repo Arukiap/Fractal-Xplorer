@@ -18,6 +18,23 @@
                 "-o",
                 "main.cpp.exe",
             ],
+            "group": "build"
+        },
+        {
+            "label": "buildLinux",
+            "type": "shell",
+            "command": "g++",
+            "args": [ 
+                "-g",
+                "main.cpp",
+                "-I",
+                "include/",
+                "-Llib",
+                "-lSDL2main",
+                "-lSDL2",
+                "-o",
+                "main.cpp.out",
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true
