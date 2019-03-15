@@ -9,14 +9,16 @@
             "command": "g++",
             "args": [ 
                 "-g",
-                "main.cpp",
+                "*.cpp",
                 "-I",
                 "include\\",
                 "-Llib",
+                "-lglew32s",
                 "-lSDL2main",
                 "-lSDL2",
                 "-o",
                 "main.cpp.exe",
+                "-lopengl32"
             ],
             "group": "build"
         },
@@ -26,14 +28,16 @@
             "command": "g++",
             "args": [ 
                 "-g",
-                "main.cpp",
+                "*.cpp",
                 "-I",
                 "include/",
                 "-Llib",
+                "-lglew32s",
                 "-lSDL2main",
                 "-lSDL2",
                 "-o",
                 "main.cpp.out",
+                "-lopengl32"
             ],
             "group": {
                 "kind": "build",
