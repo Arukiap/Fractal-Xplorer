@@ -7,7 +7,7 @@
             "label": "build",
             "type": "shell",
             "command": "g++",
-            "args": [ 
+            "args": [
                 "-g",
                 "*.cpp",
                 "stb_image.c",
@@ -21,13 +21,16 @@
                 "main.cpp.exe",
                 "-lopengl32"
             ],
-            "group": "build"
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "label": "buildLinux",
             "type": "shell",
             "command": "g++",
-            "args": [ 
+            "args": [
                 "-g",
                 "*.cpp",
                 "stb_image.c",
@@ -41,16 +44,13 @@
                 "main.cpp.out",
                 "-lOpenGL"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "group": "build"
         },
         {
             "label": "run",
             "type": "shell",
             "command": ".\\main.cpp.exe",
-            
+            "problemMatcher": []
         }
     ]
 }
