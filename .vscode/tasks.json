@@ -10,6 +10,7 @@
             "args": [ 
                 "-g",
                 "*.cpp",
+                "stb_image.c",
                 "-I",
                 "include\\",
                 "-Llib",
@@ -29,6 +30,7 @@
             "args": [ 
                 "-g",
                 "*.cpp",
+                "stb_image.c",
                 "-I",
                 "include/",
                 "-Llib",
