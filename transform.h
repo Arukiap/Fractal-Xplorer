@@ -4,6 +4,7 @@
 
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
+#include "camera.h"
 
 class Transform{
     public:
@@ -24,9 +25,16 @@ class Transform{
             glm::mat4 rotYMatrix = glm::rotate(rot.y,glm::vec3(0,1,0));
             glm::mat4 rotZMatrix = glm::rotate(rot.z,glm::vec3(0,0,1));
 
-            glm::mat4 rotMatrix = rotZMatrix * rotYMatrix * rotXMatrix; //not commutative, the order of this matters don't change
+            glm::mat4 rotMatrix = rotXMatrix * rotYMatrix * rotZMatrix; //not commutative, the order of this matters don't change
 
             return posMatrix * rotMatrix * scaleMatrix; //order matters still
+        }
+
+        inline glm::mat4 GetMVP(const Camera& camera) const{
+            glm::mat4 VP = camera.GetViewProjection();
+            glm::mat4 M = GetModel();
+
+            return VP*M;
         }
 
         inline glm::vec3& GetPos() {return pos;}
