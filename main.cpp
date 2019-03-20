@@ -50,6 +50,8 @@ int main(int argc, char* argv[]){
 
         transform.GetPos().z = sinf(counter);
         transform.GetRot().x = counter;
+        transform.GetRot().y = counter;
+        transform.GetRot().z = counter;
         //transform.GetScale().x = sinf(counter);
 
         shader.Bind();
