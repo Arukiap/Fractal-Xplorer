@@ -2,8 +2,11 @@
 #define MESH_H
 #define GLEW_STATIC
 
+#include "objloader.h"
 #include <glm/glm.hpp>
 #include <GL/glew.h>
+#include <iostream>
+
 
 class Vertex {
     public:
@@ -11,6 +14,15 @@ class Vertex {
         {
             this->pos = pos;
             this->texCoord = texCoord;
+        }
+
+        Vertex(){
+            this->pos = glm::vec3(0,0,0);
+            this->texCoord = glm::vec2(0,0);
+        }
+
+        void Debug(){
+            printf("[Vertex Debug]: Vertex with %f %f %f coordinates\n",pos.x,pos.y,pos.z);
         }
 
         inline glm::vec3* GetPos() {return &pos;}
@@ -23,7 +35,8 @@ class Vertex {
 class Mesh{
     public:
         Mesh(Vertex* vertices, unsigned int numVertices, unsigned int* indices, unsigned int numIndices);
-
+        Mesh(const std::string& fileName);
+        Mesh(const OBJFile &mesh);
         void Draw();
 
         virtual ~Mesh();
