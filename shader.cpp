@@ -22,8 +22,7 @@ Shader::Shader(const std::string& fileName){
     glValidateProgram(program);
     CheckShaderError(program,GL_VALIDATE_STATUS,true,"Error in shader, validation failed: ");   
 
-    uniforms[0] = glGetUniformLocation(program,"MVP");
-    uniforms[1] = glGetUniformLocation(program,"Normal");
+    uniforms[TRANSFORM_U] = glGetUniformLocation(program,"transform");
 }
 
 Shader::~Shader(){
@@ -38,12 +37,9 @@ void Shader::Bind(){
     glUseProgram(program);
 }
 
-void Shader::Update(const Transform& transform, const Camera& camera){
-    glm::mat4 MVP = transform.GetMVP(camera);
-    glm::mat4 Normal = transform.GetModel();
-
-    glUniformMatrix4fv(uniforms[0],1,GL_FALSE,&MVP[0][0]);
-    glUniformMatrix4fv(uniforms[1],1,GL_FALSE,&Normal[0][0]);
+void Shader::Update(const Transform& transform){
+    glm::mat4 model = transform.GetModel();
+    glUniformMatrix4fv(uniforms[TRANSFORM_U],1,GL_FALSE,&model[0][0]);
 }
 
 static GLuint CreateShader(const std::string& text, GLenum shaderType){
