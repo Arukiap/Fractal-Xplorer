@@ -31,7 +31,7 @@ int main(int argc, char* argv[]){
 
     unsigned int indices[] = {0,1,2};
 
-    OBJFile cube("." SEPARATOR "res" SEPARATOR "cube.obj");
+    OBJFile cube("." SEPARATOR "res" SEPARATOR "monkey.obj");
 
     printf("Number of vertices: %d\n Number of indices: %d\n",sizeof(vertices)/sizeof(vertices[0]),sizeof(indices)/sizeof(indices[0]));
 
