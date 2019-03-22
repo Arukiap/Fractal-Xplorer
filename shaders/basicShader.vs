@@ -1,4 +1,4 @@
-#version 120
+#version 410 core
 
 attribute vec3 pos;
 attribute vec2 texCoord;
