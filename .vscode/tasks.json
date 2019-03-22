@@ -7,12 +7,10 @@
             "label": "build",
             "type": "shell",
             "command": "g++",
-<<<<<<< HEAD
             "windows": {
                 "args": [
                     "-g",
                     "*.cpp",
-                    "stb_image.c",
                     "-I",
                     "include\\",
                     "-Llib",
@@ -28,7 +26,6 @@
                 "args": [
                     "-g",
                     "*.cpp",
-                    "stb_image.c",
                     "-I",
                     "include/",
                     "-Llib",
@@ -55,50 +52,6 @@
                 "command": "./main.cpp.out",
             },
             "problemMatcher": []
-=======
-            "args": [ 
-                "-g",
-                "*.cpp",
-                "-I",
-                "include\\",
-                "-Llib",
-                "-lglew32s",
-                "-lSDL2main",
-                "-lSDL2",
-                "-o",
-                "main.cpp.exe",
-                "-lopengl32"
-            ],
-            "group": "build"
-        },
-        {
-            "label": "buildLinux",
-            "type": "shell",
-            "command": "g++",
-            "args": [ 
-                "-g",
-                "*.cpp",
-                "-I",
-                "include/",
-                "-Llib",
-                "-lGLEW",
-                "-lSDL2main",
-                "-lSDL2",
-                "-o",
-                "main.cpp.out",
-                "-lOpenGL"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-        {
-            "label": "run",
-            "type": "shell",
-            "command": ".\\main.cpp.exe",
-            
->>>>>>> parent of b6a5c0b... Add 2d texture mapping to mesh
         }
     ]
 }
