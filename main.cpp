@@ -1,7 +1,6 @@
 #include <iostream>
 #define GLEW_STATIC
 #include <GL/glew.h>
-#include "objloader.h"
 #include "display.h"
 #include "mesh.h"
 #include "shader.h"
@@ -9,9 +8,8 @@
 #include "transform.h"
 #include "camera.h"
 
-
-#define WIDTH 1920
-#define HEIGHT 1080
+#define WIDTH 800
+#define HEIGHT 800
 
 #ifdef _WIN32
 #define SEPARATOR "\\"
@@ -31,13 +29,7 @@ int main(int argc, char* argv[]){
 
     unsigned int indices[] = {0,1,2};
 
-    OBJFile cube("." SEPARATOR "res" SEPARATOR "monkey.obj");
-
-    printf("Number of vertices: %d\n Number of indices: %d\n",sizeof(vertices)/sizeof(vertices[0]),sizeof(indices)/sizeof(indices[0]));
-
-    //Mesh mesh(vertices,sizeof(vertices)/sizeof(vertices[0]),indices,sizeof(indices)/sizeof(indices[0]));
-
-    Mesh mesh(cube);
+    Mesh mesh(vertices,sizeof(vertices)/sizeof(vertices[0]),indices,sizeof(indices)/sizeof(indices[0]));
 
     Camera camera(glm::vec3(0.0f, 0.0f, 5.0f),70.0f,(float)WIDTH/(float)HEIGHT,0.1f,100.0f);
 
@@ -49,7 +41,7 @@ int main(int argc, char* argv[]){
         display.Clear(0.0f,0.15f,0.3f,1.0f);
 
         transform.GetPos().z = sinf(counter);
-        transform.GetRot().x = counter;
+        //transform.GetRot().z = cosf(counter);
         //transform.GetScale().x = sinf(counter);
 
         shader.Bind();

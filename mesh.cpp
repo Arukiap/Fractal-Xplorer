@@ -41,41 +41,6 @@ Mesh::Mesh(Vertex* vertices, unsigned int numVertices, unsigned int* indices, un
 
 
     glBindVertexArray(0);
-
-}
-
-Mesh::Mesh(const std::string& fileName){
-
-}
-
-Mesh::Mesh(const OBJFile& mesh){
-
-    glGenVertexArrays(1, &vertexArrayObject);
-    glBindVertexArray(vertexArrayObject);
-
-    //position buffer
-
-    glGenBuffers(NUM_BUFFERS, vertexArrayBuffers);
-    glBindBuffer(GL_ARRAY_BUFFER,vertexArrayBuffers[POSITION_VB]);
-    glBufferData(GL_ARRAY_BUFFER,mesh.vertices.size()*sizeof(mesh.vertices[0]),&mesh.vertices[0],GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,0);
-
-    //texture buffer
-
-    glBindBuffer(GL_ARRAY_BUFFER,vertexArrayBuffers[TEXCOORD_VB]);
-    glBufferData(GL_ARRAY_BUFFER,mesh.uvs.size()*sizeof(mesh.uvs[0]),&mesh.uvs[0],GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,0,0);
-    
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vertexArrayBuffers[INDEX_VB]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,mesh.vertexIndices.size()*sizeof(mesh.vertexIndices[0]),&mesh.vertexIndices[0],GL_STATIC_DRAW);
-
-
-    glBindVertexArray(0);
 }
 
 Mesh::~Mesh(){
