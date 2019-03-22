@@ -37,10 +37,6 @@
                     "-lOpenGL"
                 ],
             },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
         },
         {
             "label": "run",
@@ -50,6 +46,11 @@
             },
             "linux": {
                 "command": "./main.cpp.out",
+            },
+            "dependsOn":"build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
             },
             "problemMatcher": []
         }
