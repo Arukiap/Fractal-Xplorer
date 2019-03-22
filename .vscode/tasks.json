@@ -7,52 +7,49 @@
             "label": "build",
             "type": "shell",
             "command": "g++",
-            "windows": {
-                "args": [
-                    "-g",
-                    "*.cpp",
-                    "stb_image.c",
-                    "-I",
-                    "include\\",
-                    "-Llib",
-                    "-lglew32s",
-                    "-lSDL2main",
-                    "-lSDL2",
-                    "-o",
-                    "main.cpp.exe",
-                    "-lopengl32"
-                ],
-            },
-            "linux": {
-                "args": [
-                    "-g",
-                    "*.cpp",
-                    "stb_image.c",
-                    "-I",
-                    "include/",
-                    "-Llib",
-                    "-lGLEW",
-                    "-lSDL2main",
-                    "-lSDL2",
-                    "-o",
-                    "main.cpp.out",
-                    "-lOpenGL"
-                ],
-            },
+            "args": [
+                "-g",
+                "*.cpp",
+                "stb_image.c",
+                "-I",
+                "include\\",
+                "-Llib",
+                "-lglew32s",
+                "-lSDL2main",
+                "-lSDL2",
+                "-o",
+                "main.cpp.exe",
+                "-lopengl32"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
         },
         {
+            "label": "buildLinux",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-g",
+                "*.cpp",
+                "stb_image.c",
+                "-I",
+                "include/",
+                "-Llib",
+                "-lGLEW",
+                "-lSDL2main",
+                "-lSDL2",
+                "-o",
+                "main.cpp.out",
+                "-lOpenGL"
+            ],
+            "group": "build"
+        },
+        {
             "label": "run",
             "type": "shell",
-            "windows": {
-                "command": ".\\main.cpp.exe",
-            },
-            "linux": {
-                "command": "./main.cpp.out",
-            },
+            "command": ".\\main.cpp.exe",
             "problemMatcher": []
         }
     ]
