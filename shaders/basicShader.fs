@@ -14,8 +14,14 @@ float sphereSDF(vec3 samplePoint) {
     return length(samplePoint) - 1.0;
 }
 
+float spheresDE(vec3 z)
+{
+  z.xy = mod((z.xy),1.0)-vec2(0.5); // instance on xy-plane
+  return length(z)-0.3;             // sphere DE
+}
+
 float sceneSDF(vec3 samplePoint) {
-    return sphereSDF(samplePoint);
+    return spheresDE(samplePoint);
 }
 
 float trace(vec3 from, vec3 direction) {
