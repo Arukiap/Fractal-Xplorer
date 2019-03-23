@@ -18,19 +18,16 @@ float sceneSDF(vec3 samplePoint) {
     return sphereSDF(samplePoint);
 }
 
-float shortestDistanceToSurface(vec3 eye, vec3 marchingDirection, float start, float end) {
-    float depth = start;
-    for (int i = 0; i < MAX_MARCHING_STEPS; i++) {
-        float dist = sceneSDF(eye + depth * marchingDirection);
-        if (dist < EPSILON) {
-			return depth;
-        }
-        depth += dist;
-        if (depth >= end) {
-            return end;
-        }
-    }
-    return end;
+float trace(vec3 from, vec3 direction) {
+	float totalDistance = 0.0;
+	int steps;
+	for (steps=0; steps < MAX_MARCHING_STEPS; steps++) {
+		vec3 p = from + totalDistance * direction;
+		float distance = sceneSDF(p);
+		totalDistance += distance;
+		if (distance < EPSILON) break;
+	}
+	return 1.0-float(steps)/float(MAX_MARCHING_STEPS);
 }
 
 vec3 rayDirection(float fov, vec2 size, vec2 fragCoord){
@@ -42,13 +39,8 @@ vec3 rayDirection(float fov, vec2 size, vec2 fragCoord){
 void main(){
     vec3 dir = rayDirection(45.0,vec2(800,800),gl_FragCoord.xy); // returns for each pixel the direction of the ray to march
     vec3 eye = vec3(0.0, 0.0, 5.0); // defines where the camera/eye is
-    float dist = shortestDistanceToSurface(eye, dir, MIN_DIST, MAX_DIST);
-
-    if (dist > MAX_DIST - EPSILON) {
-        // Didn't hit anything
-        gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
-		return;
-    }
     
-    gl_FragColor = vec4(0.0, 0.6, 0.2, 1.0);
+    float color = trace(eye,dir);
+
+    gl_FragColor = vec4(color,color,color,0.0);
 }
