@@ -40,7 +40,7 @@ vec3 rayDirection(float fov, vec2 size, vec2 fragCoord){
 }
 
 void main(){
-    vec3 dir = rayDirection(45.0.0,vec2(800,800),gl_FragCoord.xy); // returns for each pixel the direction of the ray to march
+    vec3 dir = rayDirection(45.00,vec2(800,800),gl_FragCoord.xy); // returns for each pixel the direction of the ray to march
     vec3 eye = vec3(0.0, 0.0, 5.0); // defines where the camera/eye is
     float dist = shortestDistanceToSurface(eye, dir, MIN_DIST, MAX_DIST);
 
