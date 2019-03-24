@@ -38,7 +38,7 @@ float trace(vec3 from, vec3 direction) {
 		totalDistance += distance;
 		if (distance > MAX_DIST || distance < EPSILON) break;
 	}
-	return 1.0-float(steps)/float(MAX_MARCHING_STEPS);
+	return totalDistance;
 }
 
 vec3 rayDirection(float fov, vec2 size, vec2 fragCoord){
@@ -51,7 +51,7 @@ void main(){
     vec3 dir = rayDirection(45.0,vec2(1920,1080),gl_FragCoord.xy); // returns for each pixel the direction of the ray to march
     vec3 eye = vec3(0.0, 1.0, 0.0); // defines where the camera/eye is
     
-    float color = trace(eye,dir);
+    float color = trace(eye,dir)/20.0;
 
     gl_FragColor = vec4(color,color,color,0.0);
 }
