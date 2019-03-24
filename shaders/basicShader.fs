@@ -47,11 +47,40 @@ vec3 rayDirection(float fov, vec2 size, vec2 fragCoord){
     return normalize(vec3(xy,-z));
 }
 
+vec3 getNormal(vec3 samplePoint){
+    float distanceToPoint = sceneSDF(samplePoint);
+    vec2 e = vec2(.01,0); //epsilon vector to facilitate calculating the normal
+
+    vec3 n = distanceToPoint - vec3(
+        sceneSDF(samplePoint-e.xyy),
+        sceneSDF(samplePoint-e.yxy),
+        sceneSDF(samplePoint-e.yyx)
+    );
+
+    return normalize(n);
+}
+
+float getLight(vec3 samplePoint){
+    vec3 lightPosition = vec3(0,5.0,-8.0);
+    vec3 light = normalize(lightPosition-samplePoint);
+    vec3 normal = getNormal(samplePoint);
+
+    float dif = dot(normal,light);
+    return dif;
+}
+
 void main(){
     vec3 dir = rayDirection(45.0,vec2(1920,1080),gl_FragCoord.xy); // returns for each pixel the direction of the ray to march
     vec3 eye = vec3(0.0, 1.0, 0.0); // defines where the camera/eye is
-    
-    float color = trace(eye,dir)/20.0;
 
-    gl_FragColor = vec4(color,color,color,0.0);
+    float marchedDistance = trace(eye,dir);
+    //float color = marchedDistance/20.0;
+
+    vec3 p = eye + dir * marchedDistance; //intersection point
+
+    float diffuse = getLight(p);
+
+    vec3 color = vec3(diffuse);
+
+    gl_FragColor = vec4(color,0.0);
 }
