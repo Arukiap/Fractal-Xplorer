@@ -3,7 +3,7 @@
 const int MAX_MARCHING_STEPS = 255;
 const float MIN_DIST = 0.0;
 const float MAX_DIST = 100.0;
-const float EPSILON = 0.0001;
+const float EPSILON = 0.01;
 
 in vec4 gl_FragCoord;
 
@@ -11,7 +11,12 @@ varying vec3 vPos;
 varying vec2 vTexCoord;
 
 float sphereSDF(vec3 samplePoint) {
-    return length(samplePoint) - 1.0;
+    vec4 sphere = vec4(0.0,1.0,-10.0,1.0);
+    return length(samplePoint-sphere.xyz) - sphere.w;
+}
+
+float planeSDF(vec3 samplePoint) {
+    return samplePoint.y;
 }
 
 float spheresDE(vec3 z)
@@ -21,7 +26,7 @@ float spheresDE(vec3 z)
 }
 
 float sceneSDF(vec3 samplePoint) {
-    return spheresDE(samplePoint);
+    return min(planeSDF(samplePoint),sphereSDF(samplePoint));
 }
 
 float trace(vec3 from, vec3 direction) {
@@ -31,7 +36,7 @@ float trace(vec3 from, vec3 direction) {
 		vec3 p = from + totalDistance * direction;
 		float distance = sceneSDF(p);
 		totalDistance += distance;
-		if (distance < EPSILON) break;
+		if (distance > MAX_DIST || distance < EPSILON) break;
 	}
 	return 1.0-float(steps)/float(MAX_MARCHING_STEPS);
 }
@@ -43,8 +48,8 @@ vec3 rayDirection(float fov, vec2 size, vec2 fragCoord){
 }
 
 void main(){
-    vec3 dir = rayDirection(45.0,vec2(800,800),gl_FragCoord.xy); // returns for each pixel the direction of the ray to march
-    vec3 eye = vec3(0.0, 0.0, 5.0); // defines where the camera/eye is
+    vec3 dir = rayDirection(45.0,vec2(1920,1080),gl_FragCoord.xy); // returns for each pixel the direction of the ray to march
+    vec3 eye = vec3(0.0, 1.0, 0.0); // defines where the camera/eye is
     
     float color = trace(eye,dir);
 
