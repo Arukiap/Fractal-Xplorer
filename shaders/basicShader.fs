@@ -71,8 +71,22 @@ float fractalDistance(vec3 z)
 	return length(z) * pow(2.0, float(-n));
 }
 
+mat4 rotateY(float theta) {
+    float c = cos(theta);
+    float s = sin(theta);
+
+    return mat4(
+        vec4(c, 0, s, 0),
+        vec4(0, 1, 0, 0),
+        vec4(-s, 0, c, 0),
+        vec4(0, 0, 0, 1)
+    );
+}
+
 float sceneSDF(vec3 samplePoint) {
-    return mandelbulbDistance(samplePoint);
+	float rotationAngle = 45.0;
+	vec3 fractalPoint = ((rotateY(rotationAngle)* vec4(samplePoint,1.0))).xyz;
+    return mandelbulbDistance(fractalPoint);
 }
 
 float trace(vec3 from, vec3 direction) {
@@ -107,7 +121,7 @@ vec3 getNormal(vec3 samplePoint){
 }
 
 float getLight(vec3 samplePoint){
-    vec3 lightPosition = vec3(10.0,50.0,-50.0);
+    vec3 lightPosition = vec3(0.2,0.2,-6.0);
     vec3 light = normalize(lightPosition-samplePoint);
     vec3 normal = getNormal(samplePoint);
 
