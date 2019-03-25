@@ -11,7 +11,7 @@ varying vec3 vPos;
 varying vec2 vTexCoord;
 
 float sphereSDF(vec3 samplePoint) {
-    vec4 sphere = vec4(0.0,1.0,-10.0,1.0);
+    vec4 sphere = vec4(0.0,1.0,-10.0,0.3);
     return length(samplePoint-sphere.xyz) - sphere.w;
 }
 
@@ -19,14 +19,14 @@ float planeSDF(vec3 samplePoint) {
     return samplePoint.y;
 }
 
-float spheresDE(vec3 z)
+float DE(vec3 z)
 {
-  z.xy = mod((z.xy),1.0)-vec2(0.5); // instance on xy-plane
-  return length(z)-0.3;             // sphere DE
+  z.xy = mod((z.xy),1.0)-vec2(0.5); // instance on xy-planex
+  return length(z-vec3(0,0,-10.0))-0.3;             // sphere DE
 }
 
 float sceneSDF(vec3 samplePoint) {
-    return min(planeSDF(samplePoint),sphereSDF(samplePoint));
+    return min(planeSDF(samplePoint),DE(samplePoint));
 }
 
 float trace(vec3 from, vec3 direction) {
@@ -76,7 +76,7 @@ float getLight(vec3 samplePoint){
 
 void main(){
     vec3 dir = rayDirection(45.0,vec2(1920,1080),gl_FragCoord.xy); // returns for each pixel the direction of the ray to march
-    vec3 eye = vec3(0.0, 1.0, 0.0); // defines where the camera/eye is
+    vec3 eye = vec3(0.0, 2.0, 10.0); // defines where the camera/eye is
 
     float marchedDistance = trace(eye,dir);
     //float color = marchedDistance/20.0;
