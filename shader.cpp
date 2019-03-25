@@ -35,6 +35,12 @@ void Shader::Bind(){
     glUseProgram(program);
 }
 
+void Shader::UpdateTime(unsigned const int timeTicks){
+    GLint timeUniformLocation = glGetUniformLocation(program,"systemTime");
+    //printf("Setting current uniform value to %d.\n",timeTicks);
+    glUniform1f(timeUniformLocation,timeTicks);
+}
+
 static GLuint CreateShader(const std::string& text, GLenum shaderType){
     GLuint shader = glCreateShader(shaderType);
 
