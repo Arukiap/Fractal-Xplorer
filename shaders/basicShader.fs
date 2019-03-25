@@ -29,19 +29,19 @@ float mandelbulbDistance(vec3 pos) {
 	vec3 z = pos;
 	float dr = 1.0;
 	float r = 0.0;
-	for (int i = 0; i < 10 ; i++) {
+	for (int i = 0; i < 8 ; i++) {
 		r = length(z);
-		if (r>10.0) break;
+		if (r>100.0) break;
 		
 		// convert to polar coordinates
 		float theta = acos(z.z/r);
 		float phi = atan(z.y,z.x);
-		dr =  pow( r, 2.0-1.0)*2.0*dr + 1.0;
+		dr =  pow( r, 4.0-1.0)*4.0*dr + 1.0;
 		
 		// scale and rotate the point
-		float zr = pow( r,2.0);
-		theta = theta*2.0;
-		phi = phi*2.0;
+		float zr = pow( r,4.0);
+		theta = theta*4.0;
+		phi = phi*4.0;
 		
 		// convert back to cartesian coordinates
 		z = zr*vec3(sin(theta)*cos(phi), sin(phi)*sin(theta), cos(theta));
@@ -122,7 +122,7 @@ float getLight(vec3 samplePoint){
 
 void main(){
     vec3 dir = rayDirection(45.0,vec2(1920,1080),gl_FragCoord.xy); // returns for each pixel the direction of the ray to march
-    vec3 eye = vec3(0.0, 0.0, -5.0); // defines where the camera/eye is
+    vec3 eye = vec3(0.0, 0.0, -6.0); // defines where the camera/eye is
 
     float marchedDistance = trace(eye,dir);
     //float color = marchedDistance/20.0;
