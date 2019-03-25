@@ -25,6 +25,31 @@ float DE(vec3 z)
   return length(z-vec3(0,0,-10.0))-0.3;             // sphere DE
 }
 
+float mandelbulbDistance(vec3 pos) {
+	vec3 z = pos;
+	float dr = 1.0;
+	float r = 0.0;
+	for (int i = 0; i < 10 ; i++) {
+		r = length(z);
+		if (r>10.0) break;
+		
+		// convert to polar coordinates
+		float theta = acos(z.z/r);
+		float phi = atan(z.y,z.x);
+		dr =  pow( r, 2.0-1.0)*2.0*dr + 1.0;
+		
+		// scale and rotate the point
+		float zr = pow( r,2.0);
+		theta = theta*2.0;
+		phi = phi*2.0;
+		
+		// convert back to cartesian coordinates
+		z = zr*vec3(sin(theta)*cos(phi), sin(phi)*sin(theta), cos(theta));
+		z+=pos;
+	}
+	return 0.5*log(r)*r/dr;
+}
+
 float fractalDistance(vec3 z)
 {
 	vec3 a1 = vec3(1,1,-1);
@@ -47,7 +72,7 @@ float fractalDistance(vec3 z)
 }
 
 float sceneSDF(vec3 samplePoint) {
-    return fractalDistance(samplePoint);
+    return mandelbulbDistance(samplePoint);
 }
 
 float trace(vec3 from, vec3 direction) {
@@ -90,14 +115,14 @@ float getLight(vec3 samplePoint){
 
     float distanceToLightSource = trace(samplePoint+normal*EPSILON*2.0,light); //march a bit above the point else we get 0 distance from trace
 
-    if(distanceToLightSource < length(lightPosition-samplePoint)) dif *= 0.1;
+    if(distanceToLightSource < length(lightPosition-samplePoint)) dif *= 0.5;
 
     return dif;
 }
 
 void main(){
     vec3 dir = rayDirection(45.0,vec2(1920,1080),gl_FragCoord.xy); // returns for each pixel the direction of the ray to march
-    vec3 eye = vec3(0.0, 0.0, -8.0); // defines where the camera/eye is
+    vec3 eye = vec3(0.0, 0.0, -5.0); // defines where the camera/eye is
 
     float marchedDistance = trace(eye,dir);
     //float color = marchedDistance/20.0;
