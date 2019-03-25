@@ -65,7 +65,12 @@ float getLight(vec3 samplePoint){
     vec3 light = normalize(lightPosition-samplePoint);
     vec3 normal = getNormal(samplePoint);
 
-    float dif = dot(normal,light);
+    float dif = clamp(dot(normal,light),0.0,1.0);
+
+    float distanceToLightSource = trace(samplePoint+normal*EPSILON*2.0,light); //march a bit above the point else we get 0 distance from trace
+
+    if(distanceToLightSource < length(lightPosition-samplePoint)) dif *= 0.1;
+
     return dif;
 }
 
