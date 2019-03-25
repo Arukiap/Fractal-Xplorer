@@ -36,7 +36,7 @@ float fractalDistance(vec3 z)
 	float dist, d;
 	while (n < 10) {
 		 c = a1; dist = length(z-a1);
-	        d = length(z-a2); if (d < dist) { c = a2; dist=d; }
+	     d = length(z-a2); if (d < dist) { c = a2; dist=d; }
 		 d = length(z-a3); if (d < dist) { c = a3; dist=d; }
 		 d = length(z-a4); if (d < dist) { c = a4; dist=d; }
 		z = 2.0*z-c*(2.0-1.0);
@@ -47,7 +47,7 @@ float fractalDistance(vec3 z)
 }
 
 float sceneSDF(vec3 samplePoint) {
-    return min(planeSDF(samplePoint),sphereSDF(samplePoint));
+    return fractalDistance(samplePoint);
 }
 
 float trace(vec3 from, vec3 direction) {
@@ -82,7 +82,7 @@ vec3 getNormal(vec3 samplePoint){
 }
 
 float getLight(vec3 samplePoint){
-    vec3 lightPosition = vec3(1.0,5.0,0.0);
+    vec3 lightPosition = vec3(10.0,50.0,-50.0);
     vec3 light = normalize(lightPosition-samplePoint);
     vec3 normal = getNormal(samplePoint);
 
@@ -97,7 +97,7 @@ float getLight(vec3 samplePoint){
 
 void main(){
     vec3 dir = rayDirection(45.0,vec2(1920,1080),gl_FragCoord.xy); // returns for each pixel the direction of the ray to march
-    vec3 eye = vec3(0.0, 1.0, -5.0); // defines where the camera/eye is
+    vec3 eye = vec3(0.0, 0.0, -8.0); // defines where the camera/eye is
 
     float marchedDistance = trace(eye,dir);
     //float color = marchedDistance/20.0;
