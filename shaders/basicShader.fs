@@ -15,9 +15,9 @@ const int ITERATIONS = 10;
 //Shader constants
 const float shadowIntensity = 0.5; // From 0.0 to 1.0 how strong you want the shadows to be
 const float shadowDiffuse = 1.0 - shadowIntensity;
-float minDistanceX = MAX_DIST; //used for orbit trap coloring
-float minDistanceY = MAX_DIST; //used for orbit trap coloring
-float minDistanceZ = MAX_DIST; //used for orbit trap coloring
+const float diffuseStrength = 1.5; // The higher the value the more bright the object gets if using normal lighting
+const float orbitStrength = 1.0; // The higher the value the more bright the object gets
+float orbitTrap = MAX_DIST; // Orbit trapping in order to shade or color fractals
 
 in vec4 gl_FragCoord;
 
@@ -53,21 +53,7 @@ float mandelbulbSDF(vec3 pos) {
 	for (int i = 0; i < ITERATIONS ; i++) {
 		r = length(z);
 
-		float distanceToPlaneX = abs(pos.x);
-		float distanceToPlaneY = abs(pos.y);
-		float distanceToPlaneZ = abs(pos.z);
-
-		if(distanceToPlaneX < minDistanceX){
-			minDistanceX = distanceToPlaneX;
-		}
-
-		if(distanceToPlaneY < minDistanceY){
-			minDistanceY = distanceToPlaneY;
-		}
-
-		if(distanceToPlaneZ < minDistanceZ){
-			minDistanceZ = distanceToPlaneZ;
-		}
+		orbitTrap = min(orbitTrap,r);
 
 		if (r>BAILOUT) break;
 		
@@ -91,7 +77,7 @@ float mandelbulbSDF(vec3 pos) {
 /*
  * Signed distance function for the estimation of the 3D Sierpinski Tetrahedron fractal
  */
-float SierpinskiSDF(vec3 z)
+float sierpinskiSDF(vec3 z)
 {
 	vec3 a1 = vec3(1,1,-1);
 	vec3 a2 = vec3(-1,-1,-1);
@@ -101,6 +87,7 @@ float SierpinskiSDF(vec3 z)
 	int n = 0;
 	float dist, d;
 	while (n < ITERATIONS) {
+		 orbitTrap = min(orbitTrap,length(z));
 		 c = a1; dist = length(z-a1);
 	     d = length(z-a2); if (d < dist) { c = a2; dist=d; }
 		 d = length(z-a3); if (d < dist) { c = a3; dist=d; }
@@ -110,6 +97,23 @@ float SierpinskiSDF(vec3 z)
 	}
 
 	return length(z) * pow(2.0, float(-n));
+}
+
+/*
+ * Signed distance function for the estimation of Julia quaternion set
+ */
+float juliaSDF(vec3 pos) {
+	vec4 p = vec4(pos, 0.0);
+	vec4 dp = vec4(1.0, 0.0,0.0,0.0);
+	for (int i = 0; i < ITERATIONS; i++) {
+		dp = 2.0* vec4(p.x*dp.x-dot(p.yzw, dp.yzw), p.x*dp.yzw+dp.x*p.yzw+cross(p.yzw, dp.yzw));
+		p = vec4(p.x*p.x-dot(p.yzw, p.yzw), vec3(2.0*p.x*p.yzw)) + 0.62;
+		float p2 = dot(p,p);
+		orbitTrap = min(orbitTrap, length(vec4(p.xyz,p2)));
+		if (p2 > BAILOUT) break;
+	}
+	float r = length(p);
+	return  0.5 * r * log(r) / length(dp);
 }
 
 /*
@@ -131,9 +135,9 @@ mat4 rotateYaxis(float theta) {
  * Represents the current scene as a conjunction of all SDFunctions we want to represent.
  */
 float sceneSDF(vec3 samplePoint) {
-	float rotationAngle = 90.0;//vSystemTime*0.0005;
+	float rotationAngle = vSystemTime*0.0005;
 	vec3 fractalPoint = ((rotateYaxis(rotationAngle)* vec4(samplePoint,1.0))).xyz;
-    return mandelbulbSDF(fractalPoint);
+    return juliaSDF(fractalPoint);
 }
 
 /*
@@ -180,13 +184,14 @@ vec3 getNormal(vec3 samplePoint){
 
 /*
  * Returns the amount of diffuse for a certain pixel.
+ * Currently not being used to light fractals, instead we simply use orbital trap.
  */
 float getLight(vec3 samplePoint){
-    vec3 lightPosition = vec3(0.2,0.2,-6.0);
+    vec3 lightPosition = vec3(0.2,0.2,-2.0);
     vec3 light = normalize(lightPosition-samplePoint);
     vec3 normal = getNormal(samplePoint);
 
-    float dif = clamp(dot(normal,light),0.0,1.0);
+    float dif = clamp(dot(normal,light)*diffuseStrength,0.0,1.0);
 
 	// march a bit above the point else we get 0 distance from rayMarch
     float distanceToLightSource = rayMarch(samplePoint+normal*EPSILON*2.0,light); 
@@ -199,8 +204,6 @@ float getLight(vec3 samplePoint){
 
 void main(){
 
-	POWER += vSystemTime*-0.0005;
-
 	// returns for each pixel the direction of the ray to march
     vec3 dir = rayDirection(FOV,vSystemResolution,gl_FragCoord.xy); 
 
@@ -212,15 +215,14 @@ void main(){
 	if(marchedDistance >= MAX_DIST){
 		gl_FragColor = vec4(0.97,0.90,0.5,0.0);
 	} else {
+		
 		// get intersection point in scene and retrieve the diffuse we need to apply
-		vec3 p = eye + dir * marchedDistance; 
-		float diffuse = getLight(p);
-
-		vec3 colors = vec3(minDistanceZ,minDistanceY,minDistanceX);
+		//vec3 p = eye + dir * marchedDistance; 
+		//float diffuse = getLight(p);
 
 		// shade our pixel accordingly
-		vec3 diffuseVec = vec3(diffuse);
+		//vec3 diffuseVec = vec3(diffuse);
 
-		gl_FragColor = vec4(diffuseVec*colors,0.0);
+		gl_FragColor = vec4(vec3(orbitTrap)*orbitStrength,0.0);
 	}
 }
