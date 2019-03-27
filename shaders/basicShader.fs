@@ -5,9 +5,10 @@ const int MAX_MARCHING_STEPS = 255;
 const float MIN_DIST = 0.0;
 const float MAX_DIST = 100.0;
 const float EPSILON = 0.01;
+const float FOV = 80.0;
 
 //Fractal constants
-const float POWER = 4.0;
+const float POWER = 8.0;
 const float BAILOUT = 50.0;
 const int ITERATIONS = 10;
 
@@ -112,7 +113,7 @@ mat4 rotateYaxis(float theta) {
 float sceneSDF(vec3 samplePoint) {
 	float rotationAngle = vSystemTime*0.0005;
 	vec3 fractalPoint = ((rotateYaxis(rotationAngle)* vec4(samplePoint,1.0))).xyz;
-    return SierpinskiSDF(fractalPoint);
+    return mandelbulbSDF(fractalPoint);
 }
 
 /*
@@ -178,10 +179,10 @@ float getLight(vec3 samplePoint){
 
 void main(){
 	// returns for each pixel the direction of the ray to march
-    vec3 dir = rayDirection(45.0,vSystemResolution,gl_FragCoord.xy); 
+    vec3 dir = rayDirection(FOV,vSystemResolution,gl_FragCoord.xy); 
 
 	// defines where the camera/eye is in space
-    vec3 eye = vec3(0.0, 0.0, -7.0); 
+    vec3 eye = vec3(0.0, 0.0, -4.0); 
 
     float marchedDistance = rayMarch(eye,dir);
 
