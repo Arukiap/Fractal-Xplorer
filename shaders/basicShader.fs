@@ -1,9 +1,19 @@
 #version 410 core
 
+//Ray Marching constants
 const int MAX_MARCHING_STEPS = 255;
 const float MIN_DIST = 0.0;
 const float MAX_DIST = 100.0;
 const float EPSILON = 0.01;
+
+//Fractal constants
+const float POWER = 4.0;
+const float BAILOUT = 50.0;
+const int ITERATIONS = 10;
+
+//Shader constants
+const float shadowIntensity = 0.5; // From 0.0 to 1.0 how strong you want the shadows to be
+const float shadowDiffuse = 1.0 - shadowIntensity;
 
 in vec4 gl_FragCoord;
 
@@ -11,38 +21,43 @@ varying vec3 vPos;
 varying vec2 vTexCoord;
 varying float vSystemTime;
 
+/*
+ * Sphere distance estimator function where sphere.w represents the radius of the sphere
+ * Used for debug and testing
+ */
 float sphereSDF(vec3 samplePoint) {
     vec4 sphere = vec4(0.0,1.0,5.0,1.0);
     return length(samplePoint-sphere.xyz) - sphere.w;
 }
 
+/*
+ * Simple xy plane distance estimator function
+ * Used for debug and testing
+ */
 float planeSDF(vec3 samplePoint) {
     return samplePoint.y;
 }
 
-float DE(vec3 z)
-{
-  z.xy = mod((z.xy),1.0)-vec2(0.5); // instance on xy-planex
-  return length(z-vec3(0,0,-10.0))-0.3;             // sphere DE
-}
-
-float mandelbulbDistance(vec3 pos) {
+/*
+ * Signed distance function for the estimation of the mandelbulb set
+ */
+float mandelbulbSDF(vec3 pos) {
 	vec3 z = pos;
 	float dr = 1.0;
 	float r = 0.0;
-	for (int i = 0; i < 10 ; i++) {
+	for (int i = 0; i < ITERATIONS ; i++) {
 		r = length(z);
-		if (r>50.0) break;
+		if (r>BAILOUT) break;
 		
 		// convert to polar coordinates
 		float theta = acos(z.z/r);
 		float phi = atan(z.y,z.x);
-		dr =  pow( r, 2.0-1.0)*2.0*dr + 1.0;
+		dr =  pow( r, POWER-1.0 )*POWER*dr + 1.0;
 		
 		// scale and rotate the point
-		float zr = pow( r,2.0);
-		theta = theta*2.0;
-		phi = phi*2.0;
+		float zr = pow( r,POWER);
+		theta = theta*POWER;
+		phi = phi*POWER;
 		
 		// convert back to cartesian coordinates
 		z = zr*vec3(sin(theta)*cos(phi), sin(phi)*sin(theta), cos(theta));
@@ -51,7 +66,10 @@ float mandelbulbDistance(vec3 pos) {
 	return 0.5*log(r)*r/dr;
 }
 
-float fractalDistance(vec3 z)
+/*
+ * Signed distance function for the estimation of the 3D Sierpinski Tetrahedron fractal
+ */
+float SierpinskiSDF(vec3 z)
 {
 	vec3 a1 = vec3(1,1,-1);
 	vec3 a2 = vec3(-1,-1,-1);
@@ -60,7 +78,7 @@ float fractalDistance(vec3 z)
 	vec3 c;
 	int n = 0;
 	float dist, d;
-	while (n < 10) {
+	while (n < ITERATIONS) {
 		 c = a1; dist = length(z-a1);
 	     d = length(z-a2); if (d < dist) { c = a2; dist=d; }
 		 d = length(z-a3); if (d < dist) { c = a3; dist=d; }
@@ -72,7 +90,10 @@ float fractalDistance(vec3 z)
 	return length(z) * pow(2.0, float(-n));
 }
 
-mat4 rotateY(float theta) {
+/*
+ * Returns a rotation matrix for a rotation of theta degrees in the y axis.
+ */
+mat4 rotateYaxis(float theta) {
     float c = cos(theta);
     float s = sin(theta);
 
@@ -84,13 +105,20 @@ mat4 rotateY(float theta) {
     );
 }
 
+/*
+ * Represents the current scene as a conjunction of all SDFunctions we want to represent.
+ */
 float sceneSDF(vec3 samplePoint) {
 	float rotationAngle = vSystemTime*0.0005;
-	vec3 fractalPoint = ((rotateY(rotationAngle)* vec4(samplePoint,1.0))).xyz;
-    return mandelbulbDistance(fractalPoint);
+	vec3 fractalPoint = ((rotateYaxis(rotationAngle)* vec4(samplePoint,1.0))).xyz;
+    return SierpinskiSDF(fractalPoint);
 }
 
-float trace(vec3 from, vec3 direction) {
+/*
+ * Ray marching algorithm.
+ * Returns aprox. distance to the scene from a certain point with a certain direction.
+ */
+float rayMarch(vec3 from, vec3 direction) {
 	float totalDistance = 0.0;
 	int steps;
 	for (steps=0; steps < MAX_MARCHING_STEPS; steps++) {
@@ -102,12 +130,19 @@ float trace(vec3 from, vec3 direction) {
 	return totalDistance;
 }
 
+/*
+ * Helper function to find the direction of the ray to march to.
+ */
 vec3 rayDirection(float fov, vec2 size, vec2 fragCoord){
     vec2 xy = fragCoord - size / 2.0;
     float z = size.y / tan(radians(fov)/2.0);
     return normalize(vec3(xy,z));
 }
 
+/*
+ * Returns an aprox. normal vector to the given point in space.
+ * Useful for lighting.
+ */
 vec3 getNormal(vec3 samplePoint){
     float distanceToPoint = sceneSDF(samplePoint);
     vec2 e = vec2(.01,0); //epsilon vector to facilitate calculating the normal
@@ -121,6 +156,9 @@ vec3 getNormal(vec3 samplePoint){
     return normalize(n);
 }
 
+/*
+ * Returns the amount of diffuse for a certain pixel.
+ */
 float getLight(vec3 samplePoint){
     vec3 lightPosition = vec3(0.2,0.2,-6.0);
     vec3 light = normalize(lightPosition-samplePoint);
@@ -128,25 +166,29 @@ float getLight(vec3 samplePoint){
 
     float dif = clamp(dot(normal,light),0.0,1.0);
 
-    float distanceToLightSource = trace(samplePoint+normal*EPSILON*2.0,light); //march a bit above the point else we get 0 distance from trace
+	// march a bit above the point else we get 0 distance from rayMarch
+    float distanceToLightSource = rayMarch(samplePoint+normal*EPSILON*2.0,light); 
 
-    if(distanceToLightSource < length(lightPosition-samplePoint)) dif *= 0.5;
+	// if distance to light source is less then the actual distance, this means we have an object in between and need to apply shadow on it
+    if(distanceToLightSource < length(lightPosition-samplePoint)) dif *= shadowDiffuse;
 
     return dif;
 }
 
 void main(){
-    vec3 dir = rayDirection(45.0,vec2(1920,1080),gl_FragCoord.xy); // returns for each pixel the direction of the ray to march
-    vec3 eye = vec3(0.0, 0.0, -7.0); // defines where the camera/eye is
+	// returns for each pixel the direction of the ray to march
+    vec3 dir = rayDirection(45.0,vec2(1920,1080),gl_FragCoord.xy); 
 
-    float marchedDistance = trace(eye,dir);
-    //float color = marchedDistance/20.0;
+	// defines where the camera/eye is in space
+    vec3 eye = vec3(0.0, 0.0, -7.0); 
 
-    vec3 p = eye + dir * marchedDistance; //intersection point
+    float marchedDistance = rayMarch(eye,dir);
 
+	// get intersection point in scene and retrieve the diffuse we need to apply
+    vec3 p = eye + dir * marchedDistance; 
     float diffuse = getLight(p);
 
+	// color our pixel accordingly
     vec3 color = vec3(diffuse);
-
-    gl_FragColor = vec4(color,0.0);
+    gl_FragColor = vec4(color.x,color.y,color.z,0.0);
 }
