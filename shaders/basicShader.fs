@@ -182,15 +182,22 @@ void main(){
     vec3 dir = rayDirection(FOV,vSystemResolution,gl_FragCoord.xy); 
 
 	// defines where the camera/eye is in space
-    vec3 eye = vec3(0.0, 0.0, -4.0); 
+    vec3 eye = vec3(0.0, 0.0,	 -4.0); 
 
     float marchedDistance = rayMarch(eye,dir);
 
-	// get intersection point in scene and retrieve the diffuse we need to apply
-    vec3 p = eye + dir * marchedDistance; 
-    float diffuse = getLight(p);
+	if(marchedDistance >= MAX_DIST){
+		gl_FragColor = vec4(0.97,0.90,0.5,0.0);
+	} else {
+		// get intersection point in scene and retrieve the diffuse we need to apply
+		vec3 p = eye + dir * marchedDistance; 
+		float diffuse = getLight(p);
 
-	// color our pixel accordingly
-    vec3 color = vec3(diffuse);
-    gl_FragColor = vec4(color.x,color.y,color.z,0.0);
+		vec3 colors = vec3(1.0,0.5,0.0);
+
+		// shade our pixel accordingly
+		vec3 diffuseVec = vec3(diffuse);
+
+		gl_FragColor = vec4(diffuseVec*colors,0.0);
+	}
 }
