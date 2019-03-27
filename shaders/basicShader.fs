@@ -20,6 +20,7 @@ in vec4 gl_FragCoord;
 varying vec3 vPos;
 varying vec2 vTexCoord;
 varying float vSystemTime;
+varying vec2 vSystemResolution;
 
 /*
  * Sphere distance estimator function where sphere.w represents the radius of the sphere
@@ -177,7 +178,7 @@ float getLight(vec3 samplePoint){
 
 void main(){
 	// returns for each pixel the direction of the ray to march
-    vec3 dir = rayDirection(45.0,vec2(1920,1080),gl_FragCoord.xy); 
+    vec3 dir = rayDirection(45.0,vSystemResolution,gl_FragCoord.xy); 
 
 	// defines where the camera/eye is in space
     vec3 eye = vec3(0.0, 0.0, -7.0); 

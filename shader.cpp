@@ -5,7 +5,11 @@ static std::string LoadShader(const std::string& fileName);
 static void CheckShaderError(GLuint shader, GLuint flag, bool isProgram, const std::string& errorMessage);
 
 
-Shader::Shader(const std::string& fileName){
+Shader::Shader(const std::string& fileName, unsigned const int displayHeight, unsigned const int displayWidth){
+
+    height = displayHeight;
+    width = displayWidth;
+
     program = glCreateProgram();
     shaders[0] = CreateShader(LoadShader(fileName + ".vs"),GL_VERTEX_SHADER);
     shaders[1] = CreateShader(LoadShader(fileName + ".fs"),GL_FRAGMENT_SHADER);
@@ -33,6 +37,8 @@ Shader::~Shader(){
 
 void Shader::Bind(){
     glUseProgram(program);
+    GLint resolutionUniformLocation = glGetUniformLocation(program,"systemResolution");
+    glUniform2f(resolutionUniformLocation,width,height);
 }
 
 void Shader::UpdateTime(unsigned const int timeTicks){

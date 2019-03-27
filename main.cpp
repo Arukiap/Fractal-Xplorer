@@ -6,8 +6,8 @@
 #include "shader.h"
 
 
-#define WIDTH 1920
-#define HEIGHT 1080
+#define WIDTH 800
+#define HEIGHT 800
 
 #ifdef _WIN32
 #define SEPARATOR "\\"
@@ -18,7 +18,7 @@ int main(int argc, char* argv[]){
 
     Display display(WIDTH,HEIGHT,"Hello world!");
 
-    Shader shader("." SEPARATOR "shaders" SEPARATOR "basicShader");
+    Shader shader("." SEPARATOR "shaders" SEPARATOR "basicShader",HEIGHT,WIDTH);
 
     Vertex vertices[] = { Vertex(glm::vec3(-1.0,1.0,0),glm::vec2(0.0,0.0)),
                           Vertex(glm::vec3(1.0,1.0,0),glm::vec2(1.0,0.0)),
