@@ -8,13 +8,16 @@ const float EPSILON = 0.01;
 const float FOV = 80.0;
 
 //Fractal constants
-const float POWER = 8.0;
+float POWER = 8.0;
 const float BAILOUT = 50.0;
 const int ITERATIONS = 10;
 
 //Shader constants
 const float shadowIntensity = 0.5; // From 0.0 to 1.0 how strong you want the shadows to be
 const float shadowDiffuse = 1.0 - shadowIntensity;
+float minDistanceX = MAX_DIST; //used for orbit trap coloring
+float minDistanceY = MAX_DIST; //used for orbit trap coloring
+float minDistanceZ = MAX_DIST; //used for orbit trap coloring
 
 in vec4 gl_FragCoord;
 
@@ -49,6 +52,23 @@ float mandelbulbSDF(vec3 pos) {
 	float r = 0.0;
 	for (int i = 0; i < ITERATIONS ; i++) {
 		r = length(z);
+
+		float distanceToPlaneX = abs(pos.x);
+		float distanceToPlaneY = abs(pos.y);
+		float distanceToPlaneZ = abs(pos.z);
+
+		if(distanceToPlaneX < minDistanceX){
+			minDistanceX = distanceToPlaneX;
+		}
+
+		if(distanceToPlaneY < minDistanceY){
+			minDistanceY = distanceToPlaneY;
+		}
+
+		if(distanceToPlaneZ < minDistanceZ){
+			minDistanceZ = distanceToPlaneZ;
+		}
+
 		if (r>BAILOUT) break;
 		
 		// convert to polar coordinates
@@ -111,7 +131,7 @@ mat4 rotateYaxis(float theta) {
  * Represents the current scene as a conjunction of all SDFunctions we want to represent.
  */
 float sceneSDF(vec3 samplePoint) {
-	float rotationAngle = vSystemTime*0.0005;
+	float rotationAngle = 90.0;//vSystemTime*0.0005;
 	vec3 fractalPoint = ((rotateYaxis(rotationAngle)* vec4(samplePoint,1.0))).xyz;
     return mandelbulbSDF(fractalPoint);
 }
@@ -178,11 +198,14 @@ float getLight(vec3 samplePoint){
 }
 
 void main(){
+
+	POWER += vSystemTime*-0.0005;
+
 	// returns for each pixel the direction of the ray to march
     vec3 dir = rayDirection(FOV,vSystemResolution,gl_FragCoord.xy); 
 
 	// defines where the camera/eye is in space
-    vec3 eye = vec3(0.0, 0.0,	 -4.0); 
+    vec3 eye = vec3(0.0, 0.0,-4.0); 
 
     float marchedDistance = rayMarch(eye,dir);
 
@@ -193,7 +216,7 @@ void main(){
 		vec3 p = eye + dir * marchedDistance; 
 		float diffuse = getLight(p);
 
-		vec3 colors = vec3(1.0,0.5,0.0);
+		vec3 colors = vec3(minDistanceZ,minDistanceY,minDistanceX);
 
 		// shade our pixel accordingly
 		vec3 diffuseVec = vec3(diffuse);

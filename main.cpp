@@ -16,7 +16,7 @@
 #endif
 int main(int argc, char* argv[]){
 
-    Display display(WIDTH,HEIGHT,"Hello world!");
+    Display display(WIDTH,HEIGHT,"Fractal Explorer");
 
     Shader shader("." SEPARATOR "shaders" SEPARATOR "basicShader",HEIGHT,WIDTH);
 
