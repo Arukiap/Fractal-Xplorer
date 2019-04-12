@@ -190,7 +190,7 @@ vec3 getNormal(vec3 samplePoint){
  * Currently not being used to light fractals, instead we simply use orbital trap.
  */
 float getLight(vec3 samplePoint){
-    vec3 lightPosition = vec3(0.0,2.0,0.0);
+    vec3 lightPosition = vec3(0.0,3.0,-4.0);
     vec3 light = normalize(lightPosition-samplePoint);
     vec3 normal = getNormal(samplePoint);
 
@@ -227,15 +227,15 @@ void main(){
 		//vec3 diffuseVec = vec3(diffuse);
 		if(orbitTrap > 0.66){
 			float ratio = (orbitTrap - 0.66)/0.33;
-			ratio *=2;
-			gl_FragColor = vec4(1.0*ratio,1.0/ratio,0.0,0.0)*diffuse*0.5;
+			ratio *=1.7;
+			gl_FragColor = vec4(1.0*ratio,1.0/ratio,0.0,0.0)*diffuse*0.7;
 		} else if(orbitTrap > 0.33){
 			float ratio = (orbitTrap -0.33)/0.33;
-			gl_FragColor = vec4(0.0,1.0*ratio,1.0/ratio,0.0)*diffuse*0.5;
+			gl_FragColor = vec4(0.0,1.0*ratio,1.0/ratio,0.0)*diffuse*0.7;
 		}
 		else {
 
-			gl_FragColor = vec4(1.0,0.8,0.8,0.0)*orbitTrap*2.8-2.1+diffuse*0.5;
+			gl_FragColor = vec4(1.0,0.8,0.8,0.0)*orbitTrap*2.8-2.1+diffuse*0.7;
 		}
 	
 	}
