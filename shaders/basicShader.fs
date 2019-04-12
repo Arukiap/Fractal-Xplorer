@@ -228,10 +228,10 @@ void main(){
 		if(orbitTrap > 0.66){
 			float ratio = (orbitTrap - 0.66)/0.33;
 			ratio *=1.7;
-			gl_FragColor = vec4(1.0*ratio,1.0/ratio,0.0,0.0)*diffuse*0.7;
+			gl_FragColor = vec4(1.0*ratio,1.0/ratio,0.0,0.0)*diffuse*0.7*orbitTrap;
 		} else if(orbitTrap > 0.33){
 			float ratio = (orbitTrap -0.33)/0.33;
-			gl_FragColor = vec4(0.0,1.0*ratio,1.0/ratio,0.0)*diffuse*0.7;
+			gl_FragColor = vec4(0.0,1.0*ratio,1.0/ratio,0.0)*diffuse*0.7*orbitTrap;
 		}
 		else {
 
