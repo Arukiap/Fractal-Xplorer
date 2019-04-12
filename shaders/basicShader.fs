@@ -119,6 +119,22 @@ float juliaSDF(vec3 pos) {
 	return  0.5 * r * log(r) / length(dp);
 }
 
+
+/*
+ * Returns a rotation matrix for a rotation of theta degrees in the z axis.
+ */
+mat4 rotateZaxis(float theta) {
+    float c = cos(theta);
+    float s = sin(theta);
+
+    return mat4(
+        vec4(c, -s, 0, 0),
+        vec4(s, c, 0, 0),
+        vec4(0, 0, 1, 0),
+        vec4(0, 0, 0, 1)
+    );
+}
+
 /*
  * Returns a rotation matrix for a rotation of theta degrees in the y axis.
  */
@@ -135,11 +151,29 @@ mat4 rotateYaxis(float theta) {
 }
 
 /*
+ * Returns a rotation matrix for a rotation of theta degrees in the x axis.
+ */
+mat4 rotateXaxis(float theta) {
+    float c = cos(theta);
+    float s = sin(theta);
+
+    return mat4(
+        vec4(1, 0, 0, 0),
+        vec4(0, c, -s, 0),
+        vec4(0,s, c, 0),
+        vec4(0, 0, 0, 1)
+    );
+}
+
+/*
  * Represents the current scene as a conjunction of all SDFunctions we want to represent.
  */
 float sceneSDF(vec3 samplePoint) {
 	float rotationAngle = vSystemTime*0.0005;
-	vec3 fractalPoint = ((rotateYaxis(rotationAngle)* vec4(samplePoint,1.0))).xyz;
+	vec3 fractalPoint = ((rotateXaxis(rotationAngle)*
+							rotateYaxis(rotationAngle)*
+							rotateYaxis(rotationAngle)*
+							vec4(samplePoint,1.0))).xyz;
     return mandelbulbSDF(fractalPoint);
 }
 
