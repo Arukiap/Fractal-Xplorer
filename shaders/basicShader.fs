@@ -16,8 +16,11 @@ const int ITERATIONS = 10;
 const float shadowIntensity = 0.5; // From 0.0 to 1.0 how strong you want the shadows to be
 const float shadowDiffuse = 1.0 - shadowIntensity;
 const float diffuseStrength = 1.5; // The higher the value the more bright the object gets if using normal lighting
-const float orbitStrength = 1.0; // The higher the value the more bright the object gets
+const float orbitStrength = 0.80; // The higher the value the more bright the object gets
 float orbitTrap = MAX_DIST; // Orbit trapping in order to shade or color fractals
+float orbitTrapX = MIN_DIST;
+float orbitTrapY = MIN_DIST;
+float orbitTrapZ = MIN_DIST;
 
 in vec4 gl_FragCoord;
 
@@ -137,7 +140,7 @@ mat4 rotateYaxis(float theta) {
 float sceneSDF(vec3 samplePoint) {
 	float rotationAngle = vSystemTime*0.0005;
 	vec3 fractalPoint = ((rotateYaxis(rotationAngle)* vec4(samplePoint,1.0))).xyz;
-    return juliaSDF(fractalPoint);
+    return mandelbulbSDF(fractalPoint);
 }
 
 /*
@@ -187,7 +190,7 @@ vec3 getNormal(vec3 samplePoint){
  * Currently not being used to light fractals, instead we simply use orbital trap.
  */
 float getLight(vec3 samplePoint){
-    vec3 lightPosition = vec3(0.2,0.2,-2.0);
+    vec3 lightPosition = vec3(0.0,2.0,0.0);
     vec3 light = normalize(lightPosition-samplePoint);
     vec3 normal = getNormal(samplePoint);
 
@@ -217,12 +220,13 @@ void main(){
 	} else {
 		
 		// get intersection point in scene and retrieve the diffuse we need to apply
-		//vec3 p = eye + dir * marchedDistance; 
-		//float diffuse = getLight(p);
+		vec3 p = eye + dir * marchedDistance; 
+		float diffuse = getLight(p);
 
 		// shade our pixel accordingly
 		//vec3 diffuseVec = vec3(diffuse);
 
-		gl_FragColor = vec4(vec3(orbitTrap)*orbitStrength,0.0);
+			gl_FragColor = vec4(1.0,0.8,0.8,0.0)*orbitTrap*2.8-2.1+diffuse*0.5;
+
 	}
 }
