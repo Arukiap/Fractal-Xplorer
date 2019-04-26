@@ -16,7 +16,6 @@
 #define SEPARATOR "/"
 #endif
 
-
 int main(int argc, char* argv[]){
 
     Display display(WIDTH,HEIGHT,"Fractal Explorer");
@@ -31,14 +30,15 @@ int main(int argc, char* argv[]){
     Mesh mesh(vertices,sizeof(vertices)/sizeof(vertices[0]));
 
     Camera camera(0.0,0.0,-4.0);
+    float cameraSpeed = 0.1f;
 
     while(!display.IsClosed()){
         display.Clear(0.0f,0.15f,0.3f,1.0f);
-        shader.Bind();
+        shader.Bind(); 
         shader.UpdateTime(SDL_GetTicks());
         shader.UpdateCamera(camera);
         mesh.Draw();
-        display.Update();
+        display.Update(&camera,cameraSpeed);
     }
 
     return 0;

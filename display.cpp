@@ -45,7 +45,7 @@ bool Display::IsClosed(){
     return isClosed;
 }
 
-void Display::Update(){
+void Display::Update(Camera *camera, float offset){
     SDL_GL_SwapWindow(window);
 
     SDL_Event e; //OS event
@@ -54,6 +54,34 @@ void Display::Update(){
         if(e.type == SDL_QUIT){
             isClosed = true;
         }
+        switch( e.type ){
+            /* Look for a keypress */
+            case SDL_KEYDOWN:
+                printf("Key down\n");
+                /* Check the SDLKey values and move change the coords */
+                switch( e.key.keysym.sym ){
+                    case SDLK_a:
+                        camera->OffsetUpdate(-offset,0.0,0.0);
+                        break;
+                    case SDLK_d:
+                        camera->OffsetUpdate(offset,0.0,0.0);
+                        break;
+                    case SDLK_w:
+                        camera->OffsetUpdate(0.0,0.0,offset);
+                        break;
+                    case SDLK_s:
+                        camera->OffsetUpdate(0.0,0.0,-offset);                        
+                        break;
+                    case SDLK_q:
+                        camera->OffsetUpdate(0.0,offset,0.0);                        
+                        break;
+                    case SDLK_z:
+                        camera->OffsetUpdate(0.0,-offset,0.0);                        
+                        break;    
+                    default:
+                        break;
+                }
+            }
     }
 
 }
