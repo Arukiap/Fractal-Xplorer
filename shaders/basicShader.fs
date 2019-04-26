@@ -246,9 +246,8 @@ void main(){
     vec3 dir = rayDirection(FOV,vSystemResolution,gl_FragCoord.xy); 
 
 	// defines where the camera/eye is in space
-    //vec3 eye = vec3(0.0, 0.0,-4.0); 
-	vec3 eye = vCamera_pos;
-
+	vec3 eye = vCamera_pos;    
+	//vec3 eye = vec3(0.0,0.0,-4.0); 
     float marchedDistance = rayMarch(eye,dir);
 
 	if(marchedDistance >= MAX_DIST){

@@ -7,8 +7,8 @@
 #include "camera.h"
 
 
-#define WIDTH 800
-#define HEIGHT 800
+#define WIDTH 400
+#define HEIGHT 400
 
 #ifdef _WIN32
 #define SEPARATOR "\\"
@@ -30,7 +30,7 @@ int main(int argc, char* argv[]){
 
     Mesh mesh(vertices,sizeof(vertices)/sizeof(vertices[0]));
 
-    Camera camera(0.0,0.0,0.0);
+    Camera camera(0.0,0.0,-4.0);
 
     while(!display.IsClosed()){
         display.Clear(0.0f,0.15f,0.3f,1.0f);

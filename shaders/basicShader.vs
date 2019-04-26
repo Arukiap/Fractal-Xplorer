@@ -11,7 +11,7 @@ varying vec3 vCamera_pos;
 
 uniform float systemTime;
 uniform vec2 systemResolution;
-uniform vec3 camera_pos;
+uniform lowp vec3 camera_pos;
 
 void main(){
     gl_Position = vec4(pos,1.0);
