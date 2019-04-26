@@ -28,6 +28,7 @@ varying vec3 vPos;
 varying vec2 vTexCoord;
 varying float vSystemTime;
 varying vec2 vSystemResolution;
+varying vec3 vCamera_pos;
 
 /*
  * Sphere distance estimator function where sphere.w represents the radius of the sphere
@@ -245,7 +246,8 @@ void main(){
     vec3 dir = rayDirection(FOV,vSystemResolution,gl_FragCoord.xy); 
 
 	// defines where the camera/eye is in space
-    vec3 eye = vec3(0.0, 0.0,-4.0); 
+    //vec3 eye = vec3(0.0, 0.0,-4.0); 
+	vec3 eye = vCamera_pos;
 
     float marchedDistance = rayMarch(eye,dir);
 

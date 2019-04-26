@@ -47,6 +47,11 @@ void Shader::UpdateTime(unsigned const int timeTicks){
     glUniform1f(timeUniformLocation,timeTicks);
 }
 
+void Shader::UpdateCamera(Camera camera){
+    GLint camera_pos = glGetUniformLocation(program,"camera_pos");
+    glUniform3f(camera_pos,camera.GetX(),camera.GetY(),camera.GetZ());
+}
+
 static GLuint CreateShader(const std::string& text, GLenum shaderType){
     GLuint shader = glCreateShader(shaderType);
 

@@ -6,6 +6,7 @@
 #include <iostream>
 #define GLEW_STATIC
 #include <GL/glew.h>
+#include "camera.h"
 
 
 class Shader{
@@ -13,6 +14,7 @@ class Shader{
         Shader(const std::string& fileName, unsigned const int displayHeight, unsigned const int displayWidth);
         void Bind();
         void UpdateTime(unsigned const int time);
+        void UpdateCamera(Camera camera);
         virtual ~Shader();
     private:
         static const unsigned int NUM_SHADERS = 2; //Vertex and Fragment shaders
