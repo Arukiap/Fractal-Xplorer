@@ -12,16 +12,15 @@ class Display {
         Display(int width, int height, const std::string& title);
 
         void Clear(float r, float g, float b, float a);
-        void Update(Camera *camera, float offset, Mouse *mouse);
+        void Update();
+        void ListenInput(Camera *camera, Mouse *mouse);
         bool IsClosed();
 
         virtual ~Display();
     private:
-        int mMouseX,mMouseY;
-        int mWidth,mHeight;
         SDL_Window* window;
         SDL_GLContext glContext;
-        bool isClosed;
+        bool isClosed,isPressedW,isPressedS;
 };
 
 #endif // DISPLAY_H

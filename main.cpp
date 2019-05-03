@@ -8,8 +8,8 @@
 #include "mouse.h"
 
 
-#define WIDTH 400
-#define HEIGHT 400
+#define WIDTH 1000
+#define HEIGHT 1000
 
 #ifdef _WIN32
 #define SEPARATOR "\\"
@@ -30,9 +30,8 @@ int main(int argc, char* argv[]){
 
     Mesh mesh(vertices,sizeof(vertices)/sizeof(vertices[0]));
 
-    Camera camera(0.0,0.0,-4.0);
+    Camera camera(0.0,0.0,-4.0,0.01);
     Mouse mouse(0.0,0.0);
-    float cameraSpeed = 0.1f;
 
     while(!display.IsClosed()){
         display.Clear(0.0f,0.15f,0.3f,1.0f);
@@ -41,7 +40,8 @@ int main(int argc, char* argv[]){
         shader.UpdateCamera(camera);
         shader.UpdateMouse(mouse);
         mesh.Draw();
-        display.Update(&camera,cameraSpeed,&mouse);
+        display.ListenInput(&camera,&mouse);
+        display.Update();
     }
 
     return 0;

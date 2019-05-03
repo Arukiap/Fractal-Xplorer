@@ -3,7 +3,7 @@
 
 class Camera {
     public:
-        Camera(float x,float y, float z);
+        Camera(float x,float y, float z, float speed);
         void Reset();
         void Update(float x,float y,float z);
         void OffsetUpdate(float x, float y, float z);
@@ -17,7 +17,7 @@ class Camera {
             return this->z;
         }
     private:
-        float x,y,z;
+        float x,y,z,speed;
 };
 
 #endif // CAMERA_H

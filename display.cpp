@@ -5,8 +5,8 @@
 
 Display::Display(int width, int height, const std::string& title){
 
-    mWidth = width;
-    mHeight = height;
+    this->isPressedW = false;
+    this->isPressedS = false;
 
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_ShowCursor(0);
@@ -52,53 +52,37 @@ bool Display::IsClosed(){
     return isClosed;
 }
 
-void Display::Update(Camera *camera, float offset, Mouse *mouse){
+void Display::Update(){
     SDL_GL_SwapWindow(window);
+}
 
+void Display::ListenInput(Camera *camera, Mouse *mouse){
     SDL_Event e; //OS event
 
-    bool mousefirst  = true;
-    bool mouseMotion = false;
+    const Uint8 *keystate = SDL_GetKeyboardState(NULL);
+
+    if(keystate[SDL_SCANCODE_W]){
+        camera->OffsetUpdate(0.0,0.0,1);        
+    }
+
+    if(keystate[SDL_SCANCODE_S]){
+        camera->OffsetUpdate(0.0,0.0,-1);         
+    }
 
     while(SDL_PollEvent(&e)){
-        if(e.type == SDL_QUIT){
-            isClosed = true;
-        }
         switch( e.type ){
-            /* Look for a keypress */
-            case SDL_KEYDOWN:
-                //printf("Key down\n");
-                /* Check the SDLKey values and move change the coords */
-                switch( e.key.keysym.sym ){
-                    case SDLK_a:
-                        camera->OffsetUpdate(-offset,0.0,0.0);
-                        break;
-                    case SDLK_d:
-                        camera->OffsetUpdate(offset,0.0,0.0);
-                        break;
-                    case SDLK_w:
-                        camera->OffsetUpdate(0.0,0.0,offset);
-                        break;
-                    case SDLK_s:
-                        camera->OffsetUpdate(0.0,0.0,-offset);                        
-                        break;
-                    case SDLK_q:
-                        camera->OffsetUpdate(0.0,offset,0.0);                        
-                        break;
-                    case SDLK_z:
-                        camera->OffsetUpdate(0.0,-offset,0.0);                        
-                        break;    
-                    default:
-                        break;
-                }
-            break;
             case SDL_MOUSEMOTION:
                 mouse->moveMouse(e.motion.xrel,e.motion.yrel);
                 break;
+            case SDL_QUIT:
+                isClosed = true;
+            default: break;
             break;
         }
 
     }
 
 }
+
+
 

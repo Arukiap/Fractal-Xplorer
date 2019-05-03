@@ -174,9 +174,6 @@ mat4 rotateXaxis(float theta) {
  */
 float sceneSDF(vec3 samplePoint) {
 	float rotationAngle = vSystemTime*0.0005;
-	vec3 fractalPoint = ((rotateXaxis(rotationAngle)*
-							rotateYaxis(rotationAngle)*
-							rotateYaxis(rotationAngle)*
 	//float rotationAngle = vSystemTime*0.0005;
 	vec3 fractalPoint = ((rotateXaxis(-vMouse_delta.y*0.005)*
 							rotateYaxis(-vMouse_delta.x*0.005)*
