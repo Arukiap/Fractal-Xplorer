@@ -5,7 +5,7 @@ const int MAX_MARCHING_STEPS = 255;
 const float MIN_DIST = 0.0;
 const float MAX_DIST = 100.0;
 const float EPSILON = 0.01;
-const float FOV = 80.0;
+const float FOV = 120.0;
 
 //Fractal constants
 float POWER = 8.0;
@@ -22,6 +22,8 @@ float orbitTrapX = MIN_DIST;
 float orbitTrapY = MIN_DIST;
 float orbitTrapZ = MIN_DIST;
 
+vec2 mouseDelta;
+
 in vec4 gl_FragCoord;
 
 varying vec3 vPos;
@@ -29,6 +31,7 @@ varying vec2 vTexCoord;
 varying float vSystemTime;
 varying vec2 vSystemResolution;
 varying vec3 vCamera_pos;
+varying vec2 vMouse_delta;
 
 /*
  * Sphere distance estimator function where sphere.w represents the radius of the sphere
@@ -174,6 +177,10 @@ float sceneSDF(vec3 samplePoint) {
 	vec3 fractalPoint = ((rotateXaxis(rotationAngle)*
 							rotateYaxis(rotationAngle)*
 							rotateYaxis(rotationAngle)*
+	//float rotationAngle = vSystemTime*0.0005;
+	vec3 fractalPoint = ((rotateXaxis(-vMouse_delta.y*0.005)*
+							rotateYaxis(-vMouse_delta.x*0.005)*
+							rotateYaxis(0)*
 							vec4(samplePoint,1.0))).xyz;
     return mandelbulbSDF(fractalPoint);
 }
@@ -240,7 +247,7 @@ float getLight(vec3 samplePoint){
     return dif;
 }
 
-void main(){
+void main(){	
 
 	// returns for each pixel the direction of the ray to march
     vec3 dir = rayDirection(FOV,vSystemResolution,gl_FragCoord.xy); 

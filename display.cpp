@@ -4,7 +4,13 @@
 #include <iostream>
 
 Display::Display(int width, int height, const std::string& title){
+
+    mWidth = width;
+    mHeight = height;
+
     SDL_Init(SDL_INIT_EVERYTHING);
+    SDL_ShowCursor(0);
+    SDL_SetRelativeMouseMode(SDL_TRUE);
 
     //32 bit color + transparency
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -17,6 +23,7 @@ Display::Display(int width, int height, const std::string& title){
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
     window =  SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,width,height,SDL_WINDOW_OPENGL);
+    
 
     //Gpu connects directly to the window, instead of being the OS in complete command of the window
     glContext = SDL_GL_CreateContext(window);
@@ -45,10 +52,13 @@ bool Display::IsClosed(){
     return isClosed;
 }
 
-void Display::Update(Camera *camera, float offset){
+void Display::Update(Camera *camera, float offset, Mouse *mouse){
     SDL_GL_SwapWindow(window);
 
     SDL_Event e; //OS event
+
+    bool mousefirst  = true;
+    bool mouseMotion = false;
 
     while(SDL_PollEvent(&e)){
         if(e.type == SDL_QUIT){
@@ -57,7 +67,7 @@ void Display::Update(Camera *camera, float offset){
         switch( e.type ){
             /* Look for a keypress */
             case SDL_KEYDOWN:
-                printf("Key down\n");
+                //printf("Key down\n");
                 /* Check the SDLKey values and move change the coords */
                 switch( e.key.keysym.sym ){
                     case SDLK_a:
@@ -81,7 +91,13 @@ void Display::Update(Camera *camera, float offset){
                     default:
                         break;
                 }
-            }
+            break;
+            case SDL_MOUSEMOTION:
+                mouse->moveMouse(e.motion.xrel,e.motion.yrel);
+                break;
+            break;
+        }
+
     }
 
 }

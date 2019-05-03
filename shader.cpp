@@ -53,6 +53,13 @@ void Shader::UpdateCamera(Camera camera){
     glUniform3f(cameraPosLocation,camera.GetX(),camera.GetY(),camera.GetZ());
 }
 
+void Shader::UpdateMouse(Mouse mouse){
+    //printf("UPDATING YAW AND PITCH: %f %f \n",mouse.GetYaw(),mouse.GetPitch());
+    GLint mouseDeltaLocation = glGetUniformLocation(program,"mouse_delta");
+    glUniform2f(mouseDeltaLocation,mouse.GetAngleX(),mouse.GetAngleY());
+}
+
+
 static GLuint CreateShader(const std::string& text, GLenum shaderType){
     GLuint shader = glCreateShader(shaderType);
 

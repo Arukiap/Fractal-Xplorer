@@ -7,6 +7,7 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include "camera.h"
+#include "mouse.h"
 
 
 class Shader{
@@ -15,6 +16,7 @@ class Shader{
         void Bind();
         void UpdateTime(unsigned const int time);
         void UpdateCamera(Camera camera);
+        void UpdateMouse(Mouse mouse);
         virtual ~Shader();
     private:
         static const unsigned int NUM_SHADERS = 2; //Vertex and Fragment shaders

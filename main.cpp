@@ -5,6 +5,7 @@
 #include "mesh.h"
 #include "shader.h"
 #include "camera.h"
+#include "mouse.h"
 
 
 #define WIDTH 400
@@ -30,6 +31,7 @@ int main(int argc, char* argv[]){
     Mesh mesh(vertices,sizeof(vertices)/sizeof(vertices[0]));
 
     Camera camera(0.0,0.0,-4.0);
+    Mouse mouse(0.0,0.0);
     float cameraSpeed = 0.1f;
 
     while(!display.IsClosed()){
@@ -37,8 +39,9 @@ int main(int argc, char* argv[]){
         shader.Bind(); 
         shader.UpdateTime(SDL_GetTicks());
         shader.UpdateCamera(camera);
+        shader.UpdateMouse(mouse);
         mesh.Draw();
-        display.Update(&camera,cameraSpeed);
+        display.Update(&camera,cameraSpeed,&mouse);
     }
 
     return 0;
