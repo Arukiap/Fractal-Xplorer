@@ -66,7 +66,7 @@ void Menu::NavigateMainMenu(int option){
         //case 2:
         //    printOptionsMenu();
         //break;
-        case 3:
+        case 2:
             ExitMenu();
         default:
         break;

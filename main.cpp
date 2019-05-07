@@ -25,6 +25,10 @@ int main(int argc, char* argv[]){
 
     while(gameMenu.IsOpen());
 
+    if(gameMenu.IsExit()){
+        return 0;
+    }
+
     Display display(WIDTH,HEIGHT,"Fractal Explorer");
 
     Shader shader("." SEPARATOR "shaders" SEPARATOR "basicShader",HEIGHT,WIDTH);
