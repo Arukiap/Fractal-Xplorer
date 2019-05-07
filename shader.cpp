@@ -35,10 +35,12 @@ Shader::~Shader(){
     glDeleteProgram(program);
 }
 
-void Shader::Bind(){
+void Shader::Bind(float selectedFractal){
     glUseProgram(program);
     GLint resolutionUniformLocation = glGetUniformLocation(program,"systemResolution");
     glUniform2f(resolutionUniformLocation,width,height);
+    GLint selectionUniformLocation = glGetUniformLocation(program,"selectedFractal");
+    glUniform1f(selectionUniformLocation,selectedFractal);
 }
 
 void Shader::UpdateTime(unsigned const int timeTicks){

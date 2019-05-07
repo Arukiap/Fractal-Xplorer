@@ -6,6 +6,7 @@
 #include "shader.h"
 #include "camera.h"
 #include "mouse.h"
+#include "menu.h"
 
 
 #define WIDTH 1000
@@ -18,6 +19,11 @@
 #endif
 
 int main(int argc, char* argv[]){
+
+    Menu gameMenu;
+    gameMenu.OpenMenu();
+
+    while(gameMenu.IsOpen());
 
     Display display(WIDTH,HEIGHT,"Fractal Explorer");
 
@@ -33,9 +39,11 @@ int main(int argc, char* argv[]){
     Camera camera(0.0,0.0,-4.0,0.01);
     Mouse mouse(0.0,0.0);
 
+    float selectedFractal = (float)gameMenu.GetSelectedFractal();
+
     while(!display.IsClosed()){
         display.Clear(0.0f,0.15f,0.3f,1.0f);
-        shader.Bind(); 
+        shader.Bind(selectedFractal); 
         shader.UpdateTime(SDL_GetTicks());
         shader.UpdateCamera(camera);
         shader.UpdateMouse(mouse);

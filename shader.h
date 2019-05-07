@@ -13,7 +13,7 @@
 class Shader{
     public:
         Shader(const std::string& fileName, unsigned const int displayHeight, unsigned const int displayWidth);
-        void Bind();
+        void Bind(float selectedFractal);
         void UpdateTime(unsigned const int time);
         void UpdateCamera(Camera camera);
         void UpdateMouse(Mouse mouse);

@@ -26,8 +26,7 @@ vec2 mouseDelta;
 
 in vec4 gl_FragCoord;
 
-varying vec3 vPos;
-varying vec2 vTexCoord;
+varying float vSelectedFractal;
 varying float vSystemTime;
 varying vec2 vSystemResolution;
 varying vec3 vCamera_pos;
@@ -123,6 +122,26 @@ float juliaSDF(vec3 pos) {
 	return  0.5 * r * log(r) / length(dp);
 }
 
+float mandelboxSDF(vec3 pos) {
+
+  float SCALE = 2.0;
+  float MR2 = 0.3;
+
+  vec4 scalevec = vec4(SCALE, SCALE, SCALE, abs(SCALE)) / MR2;
+  float C1 = abs(SCALE-1.0), C2 = pow(abs(SCALE), float(1-ITERATIONS));
+
+  // distance estimate
+  vec4 p = vec4(pos.xyz, 1.0), p0 = vec4(pos.xyz, 1.0);  // p.w is knighty's DEfactor
+  
+  for (int i=0; i<ITERATIONS; i++) {
+    p.xyz = clamp(p.xyz, -1.0, 1.0) * 2.0 - p.xyz;  // box fold: min3, max3, mad3
+    float r2 = dot(p.xyz, p.xyz);  // dp3
+    p.xyzw *= clamp(max(MR2/r2, MR2), 0.0, 1.0);  // sphere fold: div1, max1.sat, mul4
+    p.xyzw = p*scalevec + p0;  // mad4
+  }
+  return ((length(p.xyz) - C1) / p.w) - C2;
+}
+
 
 /*
  * Returns a rotation matrix for a rotation of theta degrees in the z axis.
@@ -173,13 +192,22 @@ mat4 rotateXaxis(float theta) {
  * Represents the current scene as a conjunction of all SDFunctions we want to represent.
  */
 float sceneSDF(vec3 samplePoint) {
-	float rotationAngle = vSystemTime*0.0005;
-	//float rotationAngle = vSystemTime*0.0005;
 	vec3 fractalPoint = ((rotateXaxis(-vMouse_delta.y*0.005)*
 							rotateYaxis(-vMouse_delta.x*0.005)*
 							rotateYaxis(0)*
 							vec4(samplePoint,1.0))).xyz;
-    return mandelbulbSDF(fractalPoint);
+
+	if(abs(vSelectedFractal - 1.0) < 0.1){
+		return mandelbulbSDF(fractalPoint);
+	}
+	if(abs(vSelectedFractal - 2.0) < 0.1){
+		return sierpinskiSDF(fractalPoint);
+	}
+	if(abs(vSelectedFractal - 3.0) < 0.1){
+		return juliaSDF(fractalPoint);
+	}
+
+	return mandelboxSDF(fractalPoint);
 }
 
 /*
