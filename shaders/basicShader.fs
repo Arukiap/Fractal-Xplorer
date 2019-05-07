@@ -1,26 +1,27 @@
 #version 410 core
 
 //Ray Marching constants
-const int MAX_MARCHING_STEPS = 255;
+const int MAX_MARCHING_STEPS = 128;
 const float MIN_DIST = 0.0;
 const float MAX_DIST = 100.0;
-const float EPSILON = 0.01;
+const float EPSILON = 0.0005;
 const float FOV = 120.0;
 
 //Fractal constants
 float POWER = 8.0;
 const float BAILOUT = 50.0;
 const int ITERATIONS = 10;
+const int SIERPISNKI_ITERATIONS = 20;
+const int COLORITERATIONS = 5;
 
 //Shader constants
 const float shadowIntensity = 0.5; // From 0.0 to 1.0 how strong you want the shadows to be
 const float shadowDiffuse = 1.0 - shadowIntensity;
 const float diffuseStrength = 1.5; // The higher the value the more bright the object gets if using normal lighting
 const float orbitStrength = 0.80; // The higher the value the more bright the object gets
-float orbitTrap = MAX_DIST; // Orbit trapping in order to shade or color fractals
-float orbitTrapX = MIN_DIST;
-float orbitTrapY = MIN_DIST;
-float orbitTrapZ = MIN_DIST;
+vec4 orbitTrap = vec4(MAX_DIST); // Orbit trapping in order to shade or color fractals
+int currentSteps;
+
 
 vec2 mouseDelta;
 
@@ -53,16 +54,15 @@ float planeSDF(vec3 samplePoint) {
  * Signed distance function for the estimation of the mandelbulb set
  */
 float mandelbulbSDF(vec3 pos) {
+	orbitTrap = vec4(MAX_DIST);
 	vec3 z = pos;
 	float dr = 1.0;
 	float r = 0.0;
 	for (int i = 0; i < ITERATIONS ; i++) {
 		r = length(z);
 
-		orbitTrap = min(orbitTrap,r);
-
 		if (r>BAILOUT) break;
-		
+
 		// convert to polar coordinates
 		float theta = acos(z.z/r);
 		float phi = atan(z.y,z.x);
@@ -75,7 +75,10 @@ float mandelbulbSDF(vec3 pos) {
 		
 		// convert back to cartesian coordinates
 		z = zr*vec3(sin(theta)*cos(phi), sin(phi)*sin(theta), cos(theta));
+
 		z+=pos;
+
+		if (i<COLORITERATIONS) orbitTrap = min(orbitTrap,abs(vec4(z.x,z.y,z.z,r*r)));
 	}
 	return 0.5*log(r)*r/dr;
 }
@@ -85,20 +88,22 @@ float mandelbulbSDF(vec3 pos) {
  */
 float sierpinskiSDF(vec3 z)
 {
-	vec3 a1 = vec3(1,1,-1);
-	vec3 a2 = vec3(-1,-1,-1);
-	vec3 a3 = vec3(1,-1,1);
-	vec3 a4 = vec3(-1,1,1);
+	orbitTrap = vec4(MAX_DIST);
+	vec3 a1 = vec3(1.0,1.0,-1.0);
+	vec3 a2 = vec3(-1.0,-1.0,-1.0);
+	vec3 a3 = vec3(1.0,-1.0,1.0);
+	vec3 a4 = vec3(-1.0,1.0,1.0);
 	vec3 c;
 	int n = 0;
 	float dist, d;
-	while (n < ITERATIONS) {
-		 orbitTrap = min(orbitTrap,length(z));
+	while (n < SIERPISNKI_ITERATIONS) {
 		 c = a1; dist = length(z-a1);
 	     d = length(z-a2); if (d < dist) { c = a2; dist=d; }
 		 d = length(z-a3); if (d < dist) { c = a3; dist=d; }
 		 d = length(z-a4); if (d < dist) { c = a4; dist=d; }
 		z = 2.0*z-c*(2.0-1.0);
+		float r = dot(z,z);
+		if (n<COLORITERATIONS) orbitTrap = min(orbitTrap,abs(vec4(z.x,z.y,z.z,r)));
 		n++;
 	}
 
@@ -109,13 +114,14 @@ float sierpinskiSDF(vec3 z)
  * Signed distance function for the estimation of Julia quaternion set
  */
 float juliaSDF(vec3 pos) {
+	orbitTrap = vec4(MAX_DIST);
 	vec4 p = vec4(pos, 0.0);
 	vec4 dp = vec4(1.0, 0.0,0.0,0.0);
 	for (int i = 0; i < ITERATIONS; i++) {
 		dp = 2.0* vec4(p.x*dp.x-dot(p.yzw, dp.yzw), p.x*dp.yzw+dp.x*p.yzw+cross(p.yzw, dp.yzw));
-		p = vec4(p.x*p.x-dot(p.yzw, p.yzw), vec3(2.0*p.x*p.yzw)) + 0.62;
+		p = vec4(p.x*p.x-dot(p.yzw, p.yzw), vec3(2.0*p.x*p.yzw)) + 0.2;
 		float p2 = dot(p,p);
-		orbitTrap = min(orbitTrap, length(vec4(p.xyz,p2)));
+		if (i<COLORITERATIONS) orbitTrap = min(orbitTrap, abs(vec4(p.xyz,p2)));
 		if (p2 > BAILOUT) break;
 	}
 	float r = length(p);
@@ -123,9 +129,9 @@ float juliaSDF(vec3 pos) {
 }
 
 float mandelboxSDF(vec3 pos) {
-
-  float SCALE = 2.0;
-  float MR2 = 0.3;
+	orbitTrap = vec4(MAX_DIST);
+  float SCALE = 2.8;
+  float MR2 = 0.2;
 
   vec4 scalevec = vec4(SCALE, SCALE, SCALE, abs(SCALE)) / MR2;
   float C1 = abs(SCALE-1.0), C2 = pow(abs(SCALE), float(1-ITERATIONS));
@@ -136,6 +142,7 @@ float mandelboxSDF(vec3 pos) {
   for (int i=0; i<ITERATIONS; i++) {
     p.xyz = clamp(p.xyz, -1.0, 1.0) * 2.0 - p.xyz;  // box fold: min3, max3, mad3
     float r2 = dot(p.xyz, p.xyz);  // dp3
+	if (i<COLORITERATIONS) orbitTrap = min(orbitTrap, abs(vec4(p.xyz,r2)));
     p.xyzw *= clamp(max(MR2/r2, MR2), 0.0, 1.0);  // sphere fold: div1, max1.sat, mul4
     p.xyzw = p*scalevec + p0;  // mad4
   }
@@ -223,6 +230,7 @@ float rayMarch(vec3 from, vec3 direction) {
 		totalDistance += distance;
 		if (distance > MAX_DIST || distance < EPSILON) break;
 	}
+	currentSteps = steps;
 	return totalDistance;
 }
 
@@ -257,7 +265,7 @@ vec3 getNormal(vec3 samplePoint){
  * Currently not being used to light fractals, instead we simply use orbital trap.
  */
 float getLight(vec3 samplePoint){
-    vec3 lightPosition = vec3(0.0,3.0,-4.0);
+    vec3 lightPosition = vec3(0.0,10.0,0.0);
     vec3 light = normalize(lightPosition-samplePoint);
     vec3 normal = getNormal(samplePoint);
 
@@ -283,27 +291,15 @@ void main(){
     float marchedDistance = rayMarch(eye,dir);
 
 	if(marchedDistance >= MAX_DIST){
-		gl_FragColor = vec4(0.97,0.90,0.5,0.0);
+		float glow = currentSteps/3;
+		gl_FragColor = mix(vec4(0.612,0.816,1.0,0.0),vec4(1.0,1.0,1.0,1.0),glow*0.05);
 	} else {
 		
 		// get intersection point in scene and retrieve the diffuse we need to apply
 		vec3 p = eye + dir * marchedDistance; 
 		float diffuse = getLight(p);
 
-		// shade our pixel accordingly
-		//vec3 diffuseVec = vec3(diffuse);
-		if(orbitTrap > 0.66){
-			float ratio = (orbitTrap - 0.66)/0.33;
-			ratio *=1.7;
-			gl_FragColor = vec4(1.0*ratio,1.0/ratio,0.0,0.0)*diffuse*0.7*orbitTrap;
-		} else if(orbitTrap > 0.33){
-			float ratio = (orbitTrap -0.33)/0.33;
-			gl_FragColor = vec4(0.0,1.0*ratio,1.0/ratio,0.0)*diffuse*0.7*orbitTrap;
-		}
-		else {
+		gl_FragColor = vec4(clamp(orbitTrap.wwz,0.0,1.0),1.0)*orbitTrap.w;//vec4(orbitTrap.xzy,1.0)*orbitTrap.w;//+diffuse*0.3;
 
-			gl_FragColor = vec4(1.0,0.8,0.8,0.0)*orbitTrap*2.8-2.1+diffuse*0.7;
-		}
-	
 	}
 }
