@@ -89,10 +89,10 @@ float mandelbulbSDF(vec3 pos, bool isLight) {
 float sierpinskiSDF(vec3 z, bool isLight)
 {
 	if(!isLight) orbitTrap = vec4(MAX_DIST);
-	vec3 a1 = vec3(1.0,1.0,-1.0);
-	vec3 a2 = vec3(-1.0,-1.0,-1.0);
-	vec3 a3 = vec3(1.0,-1.0,1.0);
-	vec3 a4 = vec3(-1.0,1.0,1.0);
+	vec3 a1 = vec3(0.5,0.5,-0.5);
+	vec3 a2 = vec3(-0.5,-0.5,-0.5);
+	vec3 a3 = vec3(0.5,-0.5,0.5);
+	vec3 a4 = vec3(-0.5,0.5,0.5);
 	vec3 c;
 	int n = 0;
 	float dist, d;
