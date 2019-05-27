@@ -4,7 +4,7 @@
 const int MAX_MARCHING_STEPS = 128;
 const float MIN_DIST = 0.0;
 const float MAX_DIST = 100.0;
-const float EPSILON = 0.0005;
+const float EPSILON = 0.000005;
 const float FOV = 120.0;
 
 //Fractal constants
@@ -53,8 +53,8 @@ float planeSDF(vec3 samplePoint) {
 /*
  * Signed distance function for the estimation of the mandelbulb set
  */
-float mandelbulbSDF(vec3 pos) {
-	orbitTrap = vec4(MAX_DIST);
+float mandelbulbSDF(vec3 pos, bool isLight) {
+	if(!isLight) orbitTrap = vec4(MAX_DIST);
 	vec3 z = pos;
 	float dr = 1.0;
 	float r = 0.0;
@@ -78,7 +78,7 @@ float mandelbulbSDF(vec3 pos) {
 
 		z+=pos;
 
-		if (i<COLORITERATIONS) orbitTrap = min(orbitTrap,abs(vec4(z.x,z.y,z.z,r*r)));
+		if (i<COLORITERATIONS && !isLight) orbitTrap = min(orbitTrap,abs(vec4(z.x,z.y,z.z,r*r)));
 	}
 	return 0.5*log(r)*r/dr;
 }
@@ -86,9 +86,9 @@ float mandelbulbSDF(vec3 pos) {
 /*
  * Signed distance function for the estimation of the 3D Sierpinski Tetrahedron fractal
  */
-float sierpinskiSDF(vec3 z)
+float sierpinskiSDF(vec3 z, bool isLight)
 {
-	orbitTrap = vec4(MAX_DIST);
+	if(!isLight) orbitTrap = vec4(MAX_DIST);
 	vec3 a1 = vec3(1.0,1.0,-1.0);
 	vec3 a2 = vec3(-1.0,-1.0,-1.0);
 	vec3 a3 = vec3(1.0,-1.0,1.0);
@@ -103,7 +103,7 @@ float sierpinskiSDF(vec3 z)
 		 d = length(z-a4); if (d < dist) { c = a4; dist=d; }
 		z = 2.0*z-c*(2.0-1.0);
 		float r = dot(z,z);
-		if (n<COLORITERATIONS) orbitTrap = min(orbitTrap,abs(vec4(z.x,z.y,z.z,r)));
+		if (n<COLORITERATIONS && !isLight) orbitTrap = min(orbitTrap,abs(vec4(z.x,z.y,z.z,r)));
 		n++;
 	}
 
@@ -113,23 +113,23 @@ float sierpinskiSDF(vec3 z)
 /*
  * Signed distance function for the estimation of Julia quaternion set
  */
-float juliaSDF(vec3 pos) {
-	orbitTrap = vec4(MAX_DIST);
+float juliaSDF(vec3 pos, bool isLight) {
+	if(!isLight) orbitTrap = vec4(MAX_DIST);
 	vec4 p = vec4(pos, 0.0);
 	vec4 dp = vec4(1.0, 0.0,0.0,0.0);
 	for (int i = 0; i < ITERATIONS; i++) {
 		dp = 2.0* vec4(p.x*dp.x-dot(p.yzw, dp.yzw), p.x*dp.yzw+dp.x*p.yzw+cross(p.yzw, dp.yzw));
 		p = vec4(p.x*p.x-dot(p.yzw, p.yzw), vec3(2.0*p.x*p.yzw)) + 0.2;
 		float p2 = dot(p,p);
-		if (i<COLORITERATIONS) orbitTrap = min(orbitTrap, abs(vec4(p.xyz,p2)));
+		if (i<COLORITERATIONS && !isLight) orbitTrap = min(orbitTrap, abs(vec4(p.xyz,p2)));
 		if (p2 > BAILOUT) break;
 	}
 	float r = length(p);
 	return  0.5 * r * log(r) / length(dp);
 }
 
-float mandelboxSDF(vec3 pos) {
-	orbitTrap = vec4(MAX_DIST);
+float mandelboxSDF(vec3 pos, bool isLight) {
+  if(!isLight) orbitTrap = vec4(MAX_DIST);
   float SCALE = 2.8;
   float MR2 = 0.2;
 
@@ -142,7 +142,7 @@ float mandelboxSDF(vec3 pos) {
   for (int i=0; i<ITERATIONS; i++) {
     p.xyz = clamp(p.xyz, -1.0, 1.0) * 2.0 - p.xyz;  // box fold: min3, max3, mad3
     float r2 = dot(p.xyz, p.xyz);  // dp3
-	if (i<COLORITERATIONS) orbitTrap = min(orbitTrap, abs(vec4(p.xyz,r2)));
+	if (i<COLORITERATIONS && !isLight) orbitTrap = min(orbitTrap, abs(vec4(p.xyz,r2)));
     p.xyzw *= clamp(max(MR2/r2, MR2), 0.0, 1.0);  // sphere fold: div1, max1.sat, mul4
     p.xyzw = p*scalevec + p0;  // mad4
   }
@@ -198,35 +198,36 @@ mat4 rotateXaxis(float theta) {
 /*
  * Represents the current scene as a conjunction of all SDFunctions we want to represent.
  */
-float sceneSDF(vec3 samplePoint) {
+float sceneSDF(vec3 samplePoint, bool isLight) {
+
 	vec3 fractalPoint = ((rotateXaxis(-vMouse_delta.y*0.005)*
 							rotateYaxis(-vMouse_delta.x*0.005)*
 							rotateYaxis(0)*
 							vec4(samplePoint,1.0))).xyz;
 
 	if(abs(vSelectedFractal - 1.0) < 0.1){
-		return mandelbulbSDF(fractalPoint);
+		return mandelbulbSDF(fractalPoint,isLight);
 	}
 	if(abs(vSelectedFractal - 2.0) < 0.1){
-		return sierpinskiSDF(fractalPoint);
+		return sierpinskiSDF(fractalPoint,isLight);
 	}
 	if(abs(vSelectedFractal - 3.0) < 0.1){
-		return juliaSDF(fractalPoint);
+		return juliaSDF(fractalPoint,isLight);
 	}
 
-	return mandelboxSDF(fractalPoint);
+	return mandelboxSDF(fractalPoint,isLight);
 }
 
 /*
  * Ray marching algorithm.
  * Returns aprox. distance to the scene from a certain point with a certain direction.
  */
-float rayMarch(vec3 from, vec3 direction) {
+float rayMarch(vec3 from, vec3 direction, bool isLight) {
 	float totalDistance = 0.0;
 	int steps;
 	for (steps=0; steps < MAX_MARCHING_STEPS; steps++) {
 		vec3 p = from + totalDistance * direction;
-		float distance = sceneSDF(p);
+		float distance = sceneSDF(p,isLight);
 		totalDistance += distance;
 		if (distance > MAX_DIST || distance < EPSILON) break;
 	}
@@ -247,14 +248,14 @@ vec3 rayDirection(float fov, vec2 size, vec2 fragCoord){
  * Returns an aprox. normal vector to the given point in space.
  * Useful for lighting.
  */
-vec3 getNormal(vec3 samplePoint){
-    float distanceToPoint = sceneSDF(samplePoint);
+vec3 getNormal(vec3 samplePoint, bool isLight){
+    float distanceToPoint = sceneSDF(samplePoint,isLight);
     vec2 e = vec2(.01,0); //epsilon vector to facilitate calculating the normal
 
     vec3 n = distanceToPoint - vec3(
-        sceneSDF(samplePoint-e.xyy),
-        sceneSDF(samplePoint-e.yxy),
-        sceneSDF(samplePoint-e.yyx)
+        sceneSDF(samplePoint-e.xyy,isLight),
+        sceneSDF(samplePoint-e.yxy,isLight),
+        sceneSDF(samplePoint-e.yyx,isLight)
     );
 
     return normalize(n);
@@ -267,12 +268,12 @@ vec3 getNormal(vec3 samplePoint){
 float getLight(vec3 samplePoint){
     vec3 lightPosition = vec3(0.0,10.0,0.0);
     vec3 light = normalize(lightPosition-samplePoint);
-    vec3 normal = getNormal(samplePoint);
+    vec3 normal = getNormal(samplePoint,true);
 
     float dif = clamp(dot(normal,light)*diffuseStrength,0.0,1.0);
 
 	// march a bit above the point else we get 0 distance from rayMarch
-    float distanceToLightSource = rayMarch(samplePoint+normal*EPSILON*2.0,light); 
+    float distanceToLightSource = rayMarch(samplePoint+normal*EPSILON*2.0,light,true); 
 
 	// if distance to light source is less then the actual distance, this means we have an object in between and need to apply shadow on it
     if(distanceToLightSource < length(lightPosition-samplePoint)) dif *= shadowDiffuse;
@@ -288,18 +289,19 @@ void main(){
 	// defines where the camera/eye is in space
 	vec3 eye = vCamera_pos;    
 	//vec3 eye = vec3(0.0,0.0,-4.0); 
-    float marchedDistance = rayMarch(eye,dir);
+    float marchedDistance = rayMarch(eye,dir,false);
 
 	if(marchedDistance >= MAX_DIST){
 		float glow = currentSteps/3;
-		gl_FragColor = mix(vec4(0.612,0.816,1.0,0.0),vec4(1.0,1.0,1.0,1.0),glow*0.05);
+		//gl_FragColor = mix(vec4(0.612,0.816,1.0,0.0),vec4(1.0,1.0,1.0,1.0),glow*0.05);
+		gl_FragColor = vec4(0.612,0.816,1.0,0.0);
 	} else {
 		
 		// get intersection point in scene and retrieve the diffuse we need to apply
 		vec3 p = eye + dir * marchedDistance; 
 		float diffuse = getLight(p);
 
-		gl_FragColor = vec4(clamp(orbitTrap.wwz,0.0,1.0),1.0)*orbitTrap.w;//vec4(orbitTrap.xzy,1.0)*orbitTrap.w;//+diffuse*0.3;
+		gl_FragColor = vec4(orbitTrap.xxww)*orbitTrap.w+diffuse;//vec4(orbitTrap.xzy,1.0)*orbitTrap.w;//+diffuse*0.3;
 
 	}
 }
