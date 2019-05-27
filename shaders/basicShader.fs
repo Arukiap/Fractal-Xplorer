@@ -119,7 +119,7 @@ float juliaSDF(vec3 pos, bool isLight) {
 	vec4 dp = vec4(1.0, 0.0,0.0,0.0);
 	for (int i = 0; i < ITERATIONS; i++) {
 		dp = 2.0* vec4(p.x*dp.x-dot(p.yzw, dp.yzw), p.x*dp.yzw+dp.x*p.yzw+cross(p.yzw, dp.yzw));
-		p = vec4(p.x*p.x-dot(p.yzw, p.yzw), vec3(2.0*p.x*p.yzw)) + 0.2;
+		p = vec4(p.x*p.x-dot(p.yzw, p.yzw), vec3(2.0*p.x*p.yzw))+0.2;
 		float p2 = dot(p,p);
 		if (i<COLORITERATIONS && !isLight) orbitTrap = min(orbitTrap, abs(vec4(p.xyz,p2)));
 		if (p2 > BAILOUT) break;
@@ -294,14 +294,14 @@ void main(){
 	if(marchedDistance >= MAX_DIST){
 		float glow = currentSteps/3;
 		//gl_FragColor = mix(vec4(0.612,0.816,1.0,0.0),vec4(1.0,1.0,1.0,1.0),glow*0.05);
-		gl_FragColor = vec4(0.0,0.0,0.0,0.0);
+		gl_FragColor = vec4(0.612,0.816,1.0,0.0);
 	} else {
 		
 		// get intersection point in scene and retrieve the diffuse we need to apply
 		vec3 p = eye + dir * marchedDistance; 
 		float diffuse = getLight(p);
 
-		gl_FragColor = vec4(1,1,1,1)*orbitTrap.w*0.6+diffuse*0.6;//vec4(orbitTrap.xzy,1.0)*orbitTrap.w;//+diffuse*0.3;
+		gl_FragColor = vec4(orbitTrap.x,orbitTrap.y,orbitTrap.z,1.0)*orbitTrap.w*0.6+diffuse*0.6+0.1;//vec4(orbitTrap.xzy,1.0)*orbitTrap.w;//+diffuse*0.3;
 
 	}
 }
