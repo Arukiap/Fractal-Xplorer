@@ -301,7 +301,8 @@ void main(){
 		vec3 p = eye + dir * marchedDistance; 
 		float diffuse = getLight(p);
 
-		gl_FragColor = vec4(orbitTrap.x,orbitTrap.y,orbitTrap.z,1.0)*orbitTrap.w*0.6+diffuse*0.6+0.2;//vec4(orbitTrap.xzy,1.0)*orbitTrap.w;//+diffuse*0.3;
+		vec4 baseColor = vec4(orbitTrap.x,orbitTrap.y,orbitTrap.z,1.0)*orbitTrap.w*0.6+diffuse*0.6+0.2;//vec4(orbitTrap.xzy,1.0)*orbitTrap.w;//+diffuse*0.3;
+		gl_FragColor = mix(baseColor,vec4(0.612,0.816,1.0,0.0),clamp(marchedDistance*0.3,0.0,1.0));
 
 	}
 }
