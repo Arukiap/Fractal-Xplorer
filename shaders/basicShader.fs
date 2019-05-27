@@ -8,7 +8,7 @@ const float EPSILON = 0.0005;
 const float FOV = 120.0;
 
 //Fractal constants
-float POWER = 8;
+float POWER = 11;
 const float BAILOUT = 50.0;
 const int ITERATIONS = 10;
 const int SIERPISNKI_ITERATIONS = 20;
@@ -47,7 +47,7 @@ float sphereSDF(vec3 samplePoint) {
  * Used for debug and testing
  */
 float planeSDF(vec3 samplePoint) {
-    return samplePoint.y;
+    return 0.2-samplePoint.z;
 }
 
 /*
@@ -116,10 +116,10 @@ float sierpinskiSDF(vec3 z, bool isLight)
 float juliaSDF(vec3 pos, bool isLight) {
 	if(!isLight) orbitTrap = vec4(MAX_DIST);
 	vec4 p = vec4(pos, 0.0);
-	vec4 dp = vec4(1.0, 0.0,0.0,0.0);
+	vec4 dp = vec4(1.0,0.0,0.0,0.0);
 	for (int i = 0; i < ITERATIONS; i++) {
 		dp = 2.0* vec4(p.x*dp.x-dot(p.yzw, dp.yzw), p.x*dp.yzw+dp.x*p.yzw+cross(p.yzw, dp.yzw));
-		p = vec4(p.x*p.x-dot(p.yzw, p.yzw), vec3(2.0*p.x*p.yzw))+0.2;
+		p = vec4(p.x*p.x-dot(p.yzw, p.yzw), vec3(2.0*p.x*p.yzw))+0.30;
 		float p2 = dot(p,p);
 		if (i<COLORITERATIONS && !isLight) orbitTrap = min(orbitTrap, abs(vec4(p.xyz,p2)));
 		if (p2 > BAILOUT) break;
@@ -293,7 +293,7 @@ void main(){
 
 	if(marchedDistance >= MAX_DIST){
 		float glow = currentSteps/3;
-		gl_FragColor = mix(vec4(0.612,0.816,1.0,0.0),vec4(1.0,1.0,1.0,1.0),glow*0.05);
+		gl_FragColor = mix(vec4(0.0,0.0,0.0,0.0),vec4(1.0,1.0,1.0,1.0),glow*0.05);
 		//gl_FragColor = vec4(0.612,0.816,1.0,0.0);
 	} else {
 		
@@ -301,8 +301,8 @@ void main(){
 		vec3 p = eye + dir * marchedDistance; 
 		float diffuse = getLight(p);
 
-		vec4 baseColor = vec4(orbitTrap.x,orbitTrap.y,orbitTrap.z,1.0)*orbitTrap.w*0.6+diffuse*0.6+0.2;//vec4(orbitTrap.xzy,1.0)*orbitTrap.w;//+diffuse*0.3;
-		gl_FragColor = mix(baseColor,vec4(0.612,0.816,1.0,0.0),clamp(marchedDistance*0.3,0.0,1.0));
+		vec4 baseColor = vec4(1.0,orbitTrap.z,orbitTrap.x,1.0)*orbitTrap.w*0.6+diffuse*0.6+0.2;//vec4(orbitTrap.xzy,1.0)*orbitTrap.w;//+diffuse*0.3;
+		gl_FragColor = mix(baseColor,vec4(0.0,0.0,0.0,0.0),clamp(marchedDistance*0.25,0.0,1.0));
 
 	}
 }
