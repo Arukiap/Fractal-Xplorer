@@ -4,18 +4,18 @@
 const int MAX_MARCHING_STEPS = 128;
 const float MIN_DIST = 0.0;
 const float MAX_DIST = 100.0;
-const float EPSILON = 0.000005;
+const float EPSILON = 0.0005;
 const float FOV = 120.0;
 
 //Fractal constants
-float POWER = 8.0;
+float POWER = 8;
 const float BAILOUT = 50.0;
 const int ITERATIONS = 10;
 const int SIERPISNKI_ITERATIONS = 20;
 const int COLORITERATIONS = 5;
 
 //Shader constants
-const float shadowIntensity = 0.5; // From 0.0 to 1.0 how strong you want the shadows to be
+const float shadowIntensity = 1.5; // From 0.0 to 1.0 how strong you want the shadows to be
 const float shadowDiffuse = 1.0 - shadowIntensity;
 const float diffuseStrength = 1.5; // The higher the value the more bright the object gets if using normal lighting
 const float orbitStrength = 0.80; // The higher the value the more bright the object gets
@@ -266,7 +266,7 @@ vec3 getNormal(vec3 samplePoint, bool isLight){
  * Currently not being used to light fractals, instead we simply use orbital trap.
  */
 float getLight(vec3 samplePoint){
-    vec3 lightPosition = vec3(0.0,10.0,0.0);
+    vec3 lightPosition = vec3(10.0,10.0,-10.0);
     vec3 light = normalize(lightPosition-samplePoint);
     vec3 normal = getNormal(samplePoint,true);
 
@@ -294,14 +294,14 @@ void main(){
 	if(marchedDistance >= MAX_DIST){
 		float glow = currentSteps/3;
 		//gl_FragColor = mix(vec4(0.612,0.816,1.0,0.0),vec4(1.0,1.0,1.0,1.0),glow*0.05);
-		gl_FragColor = vec4(0.612,0.816,1.0,0.0);
+		gl_FragColor = vec4(0.0,0.0,0.0,0.0);
 	} else {
 		
 		// get intersection point in scene and retrieve the diffuse we need to apply
 		vec3 p = eye + dir * marchedDistance; 
 		float diffuse = getLight(p);
 
-		gl_FragColor = vec4(orbitTrap.xxww)*orbitTrap.w+diffuse;//vec4(orbitTrap.xzy,1.0)*orbitTrap.w;//+diffuse*0.3;
+		gl_FragColor = vec4(1,1,1,1)*orbitTrap.w*0.6+diffuse*0.6;//vec4(orbitTrap.xzy,1.0)*orbitTrap.w;//+diffuse*0.3;
 
 	}
 }
